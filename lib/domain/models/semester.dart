@@ -1,14 +1,10 @@
-// =============================================================================
-// SEMESTER MODEL
-// =============================================================================
-/// Represents an academic semester/term.
-///
-/// Semesters are time-bounded collections of courses. They maintain their own
-/// GPA calculation and serve as the unit of academic progress tracking.
+import 'package:equatable/equatable.dart';
+import 'course.dart'; // CRITICAL: Import Course
+
 class Semester extends Equatable {
   final String id;
-  final String studentId; // Foreign key to Student
-  final String name; // e.g., "Fall 2024"
+  final String studentId;
+  final String name;
   final DateTime startDate;
   final DateTime endDate;
   final SemesterStatus status;
@@ -24,11 +20,6 @@ class Semester extends Equatable {
     this.courses = const [],
   });
 
-  /// Calculates semester GPA using credit-weighted formula.
-  ///
-  /// Formula: Σ(grade_point × credits) / Σ(credits)
-  /// Only includes courses with grades (excludes in-progress)
-  /// Returns null if no graded courses exist
   double? calculateGPA() {
     final gradedCourses = courses.where((c) => c.gradePoint != null).toList();
 
@@ -45,15 +36,12 @@ class Semester extends Equatable {
     return totalCredits > 0 ? totalQualityPoints / totalCredits : null;
   }
 
-  /// Total credits attempted in this semester
   int get totalCredits => courses.fold(0, (sum, c) => sum + c.credits);
 
-  /// Total credits earned (passed courses only)
   int get earnedCredits => courses
       .where((c) => c.isPassing)
       .fold(0, (sum, c) => sum + c.credits);
 
-  /// Percentage of courses completed
   double get completionRate {
     final total = courses.length;
     if (total == 0) return 0.0;
@@ -64,12 +52,12 @@ class Semester extends Equatable {
   factory Semester.fromJson(Map<String, dynamic> json) {
     return Semester(
       id: json['id'] as String,
-      studentId: json['studentId'] as String,
+      studentId: json['student_id'] as String, // Note: snake_case in DB
       name: json['name'] as String,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
+      startDate: DateTime.parse(json['start_date'] as String),
+      endDate: DateTime.parse(json['end_date'] as String),
       status: SemesterStatus.values.firstWhere(
-            (e) => e.toString() == json['status'],
+            (e) => e.toString() == 'SemesterStatus.${json['status']}',
       ),
       courses: (json['courses'] as List<dynamic>?)
           ?.map((c) => Course.fromJson(c as Map<String, dynamic>))
@@ -81,11 +69,11 @@ class Semester extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'studentId': studentId,
+      'student_id': studentId, // snake_case for DB
       'name': name,
-      'startDate': startDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
-      'status': status.toString(),
+      'start_date': startDate.toIso8601String(),
+      'end_date': endDate.toIso8601String(),
+      'status': status.name, // Use .name instead of .toString()
       'courses': courses.map((c) => c.toJson()).toList(),
     };
   }
@@ -113,7 +101,7 @@ class Semester extends Equatable {
 }
 
 enum SemesterStatus {
-  upcoming, // Not yet started
-  inProgress, // Currently active
-  completed, // Finished with all grades
+  upcoming,
+  inProgress,
+  completed,
 }

@@ -1,20 +1,14 @@
-// =============================================================================
-// COURSE MODEL
-// =============================================================================
-/// Represents an individual course within a semester.
-///
-/// Courses are the atomic unit of academic work. Each course has credits,
-/// a grade, and metadata. Multiple attempts of the same course are tracked
-/// via the attemptNumber field.
+import 'package:equatable/equatable.dart';
+
 class Course extends Equatable {
   final String id;
-  final String semesterId; // Foreign key to Semester
-  final String courseCode; // e.g., "CS101"
-  final String courseName; // e.g., "Introduction to Programming"
-  final int credits; // Credit hours (typically 1-4)
-  final String? letterGrade; // "A", "B+", "C", etc. (null if in progress)
-  final double? gradePoint; // Numeric grade on GPA scale (null if in progress)
-  final int attemptNumber; // 1 for first attempt, 2 for retake, etc.
+  final String semesterId;
+  final String courseCode;
+  final String courseName;
+  final int credits;
+  final String? letterGrade;
+  final double? gradePoint;
+  final int attemptNumber;
   final CourseType courseType;
 
   const Course({
@@ -29,27 +23,22 @@ class Course extends Equatable {
     this.courseType = CourseType.major,
   });
 
-  /// Whether this course was passed (typically >= 2.0 on 4.0 scale)
   bool get isPassing => gradePoint != null && gradePoint! >= 2.0;
-
-  /// Whether this course has been graded
   bool get isGraded => gradePoint != null;
-
-  /// Quality points earned (grade × credits)
   double get qualityPoints => (gradePoint ?? 0.0) * credits;
 
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
       id: json['id'] as String,
-      semesterId: json['semesterId'] as String,
-      courseCode: json['courseCode'] as String,
-      courseName: json['courseName'] as String,
+      semesterId: json['semester_id'] as String,
+      courseCode: json['course_code'] as String,
+      courseName: json['course_name'] as String,
       credits: json['credits'] as int,
-      letterGrade: json['letterGrade'] as String?,
-      gradePoint: (json['gradePoint'] as num?)?.toDouble(),
-      attemptNumber: json['attemptNumber'] as int? ?? 1,
+      letterGrade: json['letter_grade'] as String?,
+      gradePoint: (json['grade_point'] as num?)?.toDouble(),
+      attemptNumber: json['attempt_number'] as int? ?? 1,
       courseType: CourseType.values.firstWhere(
-            (e) => e.toString() == json['courseType'],
+            (e) => e.toString() == 'CourseType.${json['course_type']}',
         orElse: () => CourseType.major,
       ),
     );
@@ -58,14 +47,14 @@ class Course extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'semesterId': semesterId,
-      'courseCode': courseCode,
-      'courseName': courseName,
+      'semester_id': semesterId,
+      'course_code': courseCode,
+      'course_name': courseName,
       'credits': credits,
-      'letterGrade': letterGrade,
-      'gradePoint': gradePoint,
-      'attemptNumber': attemptNumber,
-      'courseType': courseType.toString(),
+      'letter_grade': letterGrade,
+      'grade_point': gradePoint,
+      'attempt_number': attemptNumber,
+      'course_type': courseType.name,
     };
   }
 
@@ -106,8 +95,8 @@ class Course extends Equatable {
 }
 
 enum CourseType {
-  major, // Core major requirement
-  minor, // Minor requirement
-  elective, // Free elective
-  general, // General education
+  major,
+  minor,
+  elective,
+  general,
 }

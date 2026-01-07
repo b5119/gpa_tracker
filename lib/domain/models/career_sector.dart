@@ -1,20 +1,15 @@
-// =============================================================================
-// CAREER SECTOR MODEL
-// =============================================================================
-/// Represents an employment sector with GPA requirements.
-///
-/// Different industries have different GPA expectations. This model captures
-/// minimum viable GPAs and competitive thresholds for various career paths.
+import 'package:equatable/equatable.dart';
+
 class CareerSector extends Equatable {
   final String id;
-  final String name; // e.g., "Investment Banking"
-  final String category; // e.g., "Finance"
-  final double minimumGPA; // Absolute minimum to be considered
-  final double competitiveGPA; // GPA needed to be competitive
-  final double targetGPA; // Ideal GPA for top opportunities
+  final String name;
+  final String category;
+  final double minimumGPA;
+  final double competitiveGPA;
+  final double targetGPA;
   final String description;
-  final List<String> typicalRoles; // Common job titles in this sector
-  final String region; // "US", "EU", "Global", etc.
+  final List<String> typicalRoles;
+  final String region;
 
   const CareerSector({
     required this.id,
@@ -28,27 +23,17 @@ class CareerSector extends Equatable {
     this.region = 'Global',
   });
 
-  /// Calculates fitness score (0.0 to 1.0) for a given GPA
-  ///
-  /// Returns:
-  /// - 0.0 if below minimum
-  /// - 0.0-0.5 between minimum and competitive
-  /// - 0.5-1.0 between competitive and target
-  /// - 1.0 if at or above target
   double calculateFitScore(double currentGPA) {
     if (currentGPA < minimumGPA) return 0.0;
     if (currentGPA >= targetGPA) return 1.0;
 
     if (currentGPA < competitiveGPA) {
-      // Scale 0.0 to 0.5 between minimum and competitive
       return 0.5 * (currentGPA - minimumGPA) / (competitiveGPA - minimumGPA);
     } else {
-      // Scale 0.5 to 1.0 between competitive and target
       return 0.5 + 0.5 * (currentGPA - competitiveGPA) / (targetGPA - competitiveGPA);
     }
   }
 
-  /// Determines readiness level for this sector
   CareerReadiness getReadiness(double currentGPA) {
     if (currentGPA < minimumGPA) return CareerReadiness.notReady;
     if (currentGPA < competitiveGPA) return CareerReadiness.eligible;
@@ -99,8 +84,8 @@ class CareerSector extends Equatable {
 }
 
 enum CareerReadiness {
-  notReady, // Below minimum GPA
-  eligible, // Meets minimum but not competitive
-  competitive, // Meets competitive threshold
-  highlyCompetitive, // Meets or exceeds target GPA
+  notReady,
+  eligible,
+  competitive,
+  highlyCompetitive,
 }
