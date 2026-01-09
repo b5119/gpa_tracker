@@ -10,8 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    equatable: ^2.0.8
-
 
   # UI Icons
   cupertino_icons: ^1.0.8
@@ -54,4 +52,4 @@ flutter:
   #       - asset: fonts/Inter-Bold.ttf
   #         weight: 700
   #       - asset: fonts/Inter-SemiBold.ttf
-  #         weight: 600AA
+  #         weight: 600

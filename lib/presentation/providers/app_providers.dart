@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/models/student.dart';
 import '../../domain/models/semester.dart';
 import '../../domain/models/course.dart';
@@ -121,3 +122,88 @@ class SemestersNotifier extends Notifier<AsyncValue<List<Semester>>> {
 final semestersProvider = NotifierProvider<SemestersNotifier, AsyncValue<List<Semester>>>(
       () => SemestersNotifier(),
 );
+// Add this at the end of lib/presentation/providers/app_providers.dart
+
+/// Computed current GPA provider
+final currentGPAProvider = Provider<AsyncValue<double?>>((ref) {
+  final semestersAsync = ref.watch(semestersProvider);
+  final studentAsync = ref.watch(currentStudentProvider);
+  final calculator = ref.watch(gpaCalculationEngineProvider);
+
+  return semestersAsync.when(
+    data: (semesters) {
+      if (semesters.isEmpty) return const AsyncValue.data(null);
+
+      return studentAsync.when(
+        data: (student) {
+          if (student == null) return const AsyncValue.data(null);
+
+          // Convert to calculation format
+          final semesterCourses = <String, List<CourseGrade>>{};
+          for (final semester in semesters) {
+            semesterCourses[semester.id] = semester.courses
+                .map((c) => CourseGrade(
+              courseCode: c.courseCode,
+              courseName: c.courseName,
+              credits: c.credits,
+              gradePoint: c.gradePoint,
+              letterGrade: c.letterGrade,
+            ))
+                .toList();
+          }
+
+          final result = calculator.calculateCumulativeGPA(
+            semesterCourses,
+            student.retakePolicy,
+          );
+
+          return AsyncValue.data(result.gpa);
+        },
+        loading: () => const AsyncValue.loading(),
+        error: (err, stack) => AsyncValue.error(err, stack),
+      );
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (err, stack) => AsyncValue.error(err, stack),
+  );
+});
+
+/// Performance analysis provider
+final performanceAnalysisProvider = Provider<AsyncValue<PerformanceAnalysis>>((ref) {
+  final semestersAsync = ref.watch(semestersProvider);
+  final analytics = ref.watch(analyticsEngineProvider);
+
+  return semestersAsync.when(
+    data: (semesters) {
+      final semesterGPAs = semesters
+          .map((s) => s.calculateGPA())
+          .where((gpa) => gpa != null)
+          .cast<double>()
+          .toList();
+
+      final analysis = analytics.analyzePerformance(semesterGPAs);
+      return AsyncValue.data(analysis);
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (err, stack) => AsyncValue.error(err, stack),
+  );
+});
+
+/// Career fit provider
+final careerFitProvider = Provider<AsyncValue<CareerFitReport>>((ref) {
+  final currentGPAAsync = ref.watch(currentGPAProvider);
+  final careerEngine = ref.watch(careerIntelligenceProvider);
+
+  return currentGPAAsync.when(
+    data: (gpa) {
+      if (gpa == null) {
+        return AsyncValue.error('No GPA data available', StackTrace.current);
+      }
+
+      final report = careerEngine.analyzeCareerFit(currentGPA: gpa);
+      return AsyncValue.data(report);
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (err, stack) => AsyncValue.error(err, stack),
+  );
+});

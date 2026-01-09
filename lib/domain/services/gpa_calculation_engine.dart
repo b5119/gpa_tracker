@@ -13,7 +13,7 @@
 // 4. Configurable for different institutional policies
 
 import 'dart:math' as math;
-
+import '../models/student.dart'; // Added this line to import RetakePolicy
 /// Core GPA calculation service following domain-driven design principles.
 ///
 /// This service is stateless and pure - all calculations are deterministic
@@ -451,7 +451,7 @@ class RequiredGPAResult {
   }
 }
 
-/// Result of what-if simulation.
+/// Result of what_if simulation.
 class WhatIfResult {
   final double originalGPA;
   final double projectedGPA;
@@ -484,8 +484,3 @@ enum GPAImpact {
   majorDecrease,
 }
 
-enum RetakePolicy {
-  replace,
-  average,
-  best,
-}

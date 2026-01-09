@@ -1,6 +1,8 @@
 // =============================================================================
 // GPA PROJECTION MODEL
 // =============================================================================
+import 'package:equatable/equatable.dart';
+
 /// Represents a predicted future GPA scenario.
 ///
 /// This value object encapsulates the results of predictive modeling,
