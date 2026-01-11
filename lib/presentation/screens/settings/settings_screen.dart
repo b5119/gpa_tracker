@@ -11,6 +11,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final studentAsync = ref.watch(currentStudentProvider);
+    final gradingConfigAsync = ref.watch(gradingConfigProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,7 +57,13 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.school,
                 title: 'Program',
-                subtitle: student.program,
+                subtitle: '${student.program} (${student.programType.displayName})',
+                onTap: () => _showEditStudentDialog(context, ref, student),
+              ),
+              _SettingsTile(
+                icon: Icons.calendar_today,
+                title: 'Program Duration',
+                subtitle: '${student.programDurationYears} years',
                 onTap: () => _showEditStudentDialog(context, ref, student),
               ),
 
@@ -64,23 +71,23 @@ class SettingsScreen extends ConsumerWidget {
 
               // Academic Settings
               _SectionHeader(title: 'Academic Settings'),
-              _SettingsTile(
-                icon: Icons.speed,
-                title: 'GPA Scale',
-                subtitle: '${student.gpaScale.toStringAsFixed(1)} Scale',
-                onTap: () => _showGPAScaleDialog(context, ref, student),
+              gradingConfigAsync.when(
+                data: (config) {
+                  return _SettingsTile(
+                    icon: Icons.speed,
+                    title: 'GPA Scale',
+                    subtitle: config?.name ?? 'Not set',
+                    onTap: () => _showGPAScaleDialog(context, ref, config),
+                  );
+                },
+                loading: () => const CircularProgressIndicator(),
+                error: (_, __) => const SizedBox(),
               ),
               _SettingsTile(
                 icon: Icons.replay,
                 title: 'Retake Policy',
                 subtitle: _getRetakePolicyLabel(student.retakePolicy),
                 onTap: () => _showRetakePolicyDialog(context, ref, student),
-              ),
-              _SettingsTile(
-                icon: Icons.calendar_today,
-                title: 'Enrollment Date',
-                subtitle: _formatDate(student.enrollmentDate),
-                onTap: () => _showEditStudentDialog(context, ref, student),
               ),
               _SettingsTile(
                 icon: Icons.confirmation_number,
@@ -117,14 +124,6 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: AppInfo.appVersion,
                 onTap: null,
               ),
-              _SettingsTile(
-                icon: Icons.privacy_tip,
-                title: 'Privacy Policy',
-                subtitle: 'View our privacy policy',
-                onTap: () {
-                  // Open privacy policy
-                },
-              ),
             ],
           );
         },
@@ -134,7 +133,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditStudentDialog(BuildContext context, WidgetRef ref, student) {
+  void _showEditStudentDialog(BuildContext context, WidgetRef ref, Student student) {
     showDialog(
       context: context,
       builder: (context) => EditStudentDialog(student: student),
@@ -148,7 +147,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showGPAScaleDialog(BuildContext context, WidgetRef ref, student) {
+  void _showGPAScaleDialog(BuildContext context, WidgetRef ref, gradingConfig) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -159,13 +158,12 @@ class SettingsScreen extends ConsumerWidget {
             ListTile(
               title: const Text('4.0 Scale'),
               subtitle: const Text('Standard US system'),
-              leading: Radio<double>(
-                value: 4.0,
-                groupValue: student.gpaScale,
+              leading: Radio<String>(
+                value: 'us_4_0_standard',
+                groupValue: gradingConfig?.id,
                 onChanged: (value) {
                   if (value != null) {
-                    final updated = student.copyWith(gpaScale: value);
-                    ref.read(currentStudentProvider.notifier).updateStudent(updated);
+                    ref.read(gradingConfigProvider.notifier).setActiveConfig(value);
                     Navigator.pop(context);
                   }
                 },
@@ -174,13 +172,12 @@ class SettingsScreen extends ConsumerWidget {
             ListTile(
               title: const Text('5.0 Scale'),
               subtitle: const Text('Some universities'),
-              leading: Radio<double>(
-                value: 5.0,
-                groupValue: student.gpaScale,
+              leading: Radio<String>(
+                value: 'us_5_0_standard',
+                groupValue: gradingConfig?.id,
                 onChanged: (value) {
                   if (value != null) {
-                    final updated = student.copyWith(gpaScale: value);
-                    ref.read(currentStudentProvider.notifier).updateStudent(updated);
+                    ref.read(gradingConfigProvider.notifier).setActiveConfig(value);
                     Navigator.pop(context);
                   }
                 },
@@ -192,7 +189,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showRetakePolicyDialog(BuildContext context, WidgetRef ref, student) {
+  void _showRetakePolicyDialog(BuildContext context, WidgetRef ref, Student student) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -255,7 +252,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              // TODO: Implement reset functionality
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Reset functionality coming soon')),
@@ -289,10 +285,6 @@ class SettingsScreen extends ConsumerWidget {
       case RetakePolicy.best:
         return 'Highest grade earned';
     }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.month}/${date.day}/${date.year}';
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../providers/app_providers.dart';
+import '../settings/settings_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -22,10 +23,17 @@ class DashboardScreen extends ConsumerWidget {
               ref.invalidate(semestersProvider);
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // Navigate to settings
+    IconButton(
+    icon: const Icon(Icons.settings_outlined),
+    onPressed: () {
+    Navigator.push(
+    context,
+    MaterialPageRoute(
+    builder: (context) => const SettingsScreen(),
+    ),
+    );
+    },
+    ),
             },
           ),
         ],
