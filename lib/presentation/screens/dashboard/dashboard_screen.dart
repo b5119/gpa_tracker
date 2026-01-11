@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
@@ -23,17 +22,15 @@ class DashboardScreen extends ConsumerWidget {
               ref.invalidate(semestersProvider);
             },
           ),
-    IconButton(
-    icon: const Icon(Icons.settings_outlined),
-    onPressed: () {
-    Navigator.push(
-    context,
-    MaterialPageRoute(
-    builder: (context) => const SettingsScreen(),
-    ),
-    );
-    },
-    ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
         ],
@@ -375,9 +372,7 @@ class _SemesterCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(
-          backgroundColor: gpa != null
-              ? AppColors.getGPAColor(gpa!)
-              : Colors.grey,
+          backgroundColor: gpa != null ? AppColors.getGPAColor(gpa!) : Colors.grey,
           child: Text(
             gpa?.toStringAsFixed(1) ?? '--',
             style: const TextStyle(
