@@ -18,8 +18,9 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 3, // Incremented version for grading config
       onCreate: _createDatabase,
+      onUpgrade: _onUpgrade,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -27,18 +28,48 @@ class DatabaseService {
   }
 
   Future<void> _createDatabase(Database db, int version) async {
-    // Students table
+    // Grading configurations table
+    await db.execute('''
+      CREATE TABLE grading_configs (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        system_type TEXT NOT NULL,
+        max_gpa REAL NOT NULL,
+        min_gpa REAL NOT NULL DEFAULT 0.0,
+        grade_to_point_map TEXT NOT NULL,
+        classifications TEXT NOT NULL,
+        is_default INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        last_modified TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_grading_configs_default 
+      ON grading_configs(is_default)
+    ''');
+
+    // Students table with enhanced fields
     await db.execute('''
       CREATE TABLE students (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         email TEXT NOT NULL,
         program TEXT NOT NULL,
+        program_type TEXT NOT NULL DEFAULT 'bachelors',
+        program_duration_years INTEGER NOT NULL DEFAULT 4,
         gpa_scale REAL NOT NULL,
         enrollment_date TEXT NOT NULL,
+        start_term TEXT NOT NULL DEFAULT 'fall',
         total_credits_required INTEGER NOT NULL,
-        retake_policy TEXT NOT NULL
+        retake_policy TEXT NOT NULL,
+        grading_config_id TEXT,
+        FOREIGN KEY (grading_config_id) REFERENCES grading_configs(id) ON DELETE SET NULL
       )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_students_grading_config ON students(grading_config_id)
     ''');
 
     // Semesters table
@@ -99,10 +130,166 @@ class DatabaseService {
     ''');
   }
 
+  /// Handle database upgrades for existing installations
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Migration from version 1 to version 2 (program fields)
+    if (oldVersion < 2) {
+      await db.execute('''
+        ALTER TABLE students ADD COLUMN program_type TEXT NOT NULL DEFAULT 'bachelors'
+      ''');
+
+      await db.execute('''
+        ALTER TABLE students ADD COLUMN program_duration_years INTEGER NOT NULL DEFAULT 4
+      ''');
+
+      await db.execute('''
+        ALTER TABLE students ADD COLUMN start_term TEXT NOT NULL DEFAULT 'fall'
+      ''');
+    }
+
+    // Migration from version 2 to version 3 (grading configs)
+    if (oldVersion < 3) {
+      // Create grading configurations table
+      await db.execute('''
+        CREATE TABLE grading_configs (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          system_type TEXT NOT NULL,
+          max_gpa REAL NOT NULL,
+          min_gpa REAL NOT NULL DEFAULT 0.0,
+          grade_to_point_map TEXT NOT NULL,
+          classifications TEXT NOT NULL,
+          is_default INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL,
+          last_modified TEXT
+        )
+      ''');
+
+      await db.execute('''
+        CREATE INDEX idx_grading_configs_default 
+        ON grading_configs(is_default)
+      ''');
+
+      // Add grading_config_id to students table
+      await db.execute('''
+        ALTER TABLE students 
+        ADD COLUMN grading_config_id TEXT
+      ''');
+
+      await db.execute('''
+        CREATE INDEX idx_students_grading_config ON students(grading_config_id)
+      ''');
+    }
+  }
+
   /// Close database connection
   Future<void> close() async {
     final db = await database;
     await db.close();
     _database = null;
+  }
+
+  /// Delete database (useful for development/testing)
+  Future<void> deleteDatabase() async {
+    final databasePath = await getDatabasesPath();
+    final path = join(databasePath, 'gpa_tracker.db');
+    await databaseFactory.deleteDatabase(path);
+    _database = null;
+  }
+
+  /// Reset database (drop all tables and recreate)
+  Future<void> resetDatabase() async {
+    final db = await database;
+
+    // Drop all tables in correct order (respecting foreign keys)
+    await db.execute('DROP TABLE IF EXISTS gpa_records');
+    await db.execute('DROP TABLE IF EXISTS courses');
+    await db.execute('DROP TABLE IF EXISTS semesters');
+    await db.execute('DROP TABLE IF EXISTS students');
+    await db.execute('DROP TABLE IF EXISTS grading_configs');
+
+    // Recreate database
+    await _createDatabase(db, 3);
+  }
+
+  /// Get all grading configurations
+  Future<List<Map<String, dynamic>>> getGradingConfigs() async {
+    final db = await database;
+    return await db.query('grading_configs', orderBy: 'is_default DESC, name ASC');
+  }
+
+  /// Get default grading configuration
+  Future<Map<String, dynamic>?> getDefaultGradingConfig() async {
+    final db = await database;
+    final results = await db.query(
+      'grading_configs',
+      where: 'is_default = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+    return results.isNotEmpty ? results.first : null;
+  }
+
+  /// Set a grading config as default (unsets previous default)
+  Future<void> setDefaultGradingConfig(String configId) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Unset all defaults
+      await txn.update(
+        'grading_configs',
+        {'is_default': 0},
+        where: 'is_default = ?',
+        whereArgs: [1],
+      );
+
+      // Set new default
+      await txn.update(
+        'grading_configs',
+        {'is_default': 1, 'last_modified': DateTime.now().toIso8601String()},
+        where: 'id = ?',
+        whereArgs: [configId],
+      );
+    });
+  }
+
+  /// Insert grading configuration
+  Future<void> insertGradingConfig(Map<String, dynamic> config) async {
+    final db = await database;
+    await db.insert('grading_configs', config);
+  }
+
+  /// Update grading configuration
+  Future<void> updateGradingConfig(String id, Map<String, dynamic> config) async {
+    final db = await database;
+    await db.update(
+      'grading_configs',
+      {...config, 'last_modified': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Delete grading configuration
+  Future<void> deleteGradingConfig(String id) async {
+    final db = await database;
+
+    // Check if any students are using this config
+    final students = await db.query(
+      'students',
+      where: 'grading_config_id = ?',
+      whereArgs: [id],
+    );
+
+    if (students.isNotEmpty) {
+      throw Exception(
+          'Cannot delete grading config: ${students.length} student(s) are using it'
+      );
+    }
+
+    await db.delete(
+      'grading_configs',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

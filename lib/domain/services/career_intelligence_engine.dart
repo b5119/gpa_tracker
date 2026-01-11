@@ -16,8 +16,8 @@
 // 2. Identifies realistic career paths
 // 3. Provides actionable recommendations
 // 4. Calculates GPA targets for desired careers
-
 import 'dart:math' as math;
+import '../models/career_sector.dart';
 
 /// Career sector intelligence and academic-to-career mapping service.
 ///
@@ -382,7 +382,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.7,
     targetGPA: 3.9,
     description: 'Highly selective bulge bracket and boutique investment banks',
-    typicalRoles: ['Analyst', 'Associate', 'M&A Specialist'],
+    typicalRoles: const ['Analyst', 'Associate', 'M&A Specialist'],
     region: 'US',
   ),
   CareerSector(
@@ -393,7 +393,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.6,
     targetGPA: 3.8,
     description: 'Top-tier consulting firms (MBB and similar)',
-    typicalRoles: ['Analyst', 'Consultant', 'Strategy Associate'],
+    typicalRoles: const ['Analyst', 'Consultant', 'Strategy Associate'],
     region: 'US',
   ),
   CareerSector(
@@ -404,7 +404,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.2,
     targetGPA: 3.7,
     description: 'Tech companies (FAANG and startups) - skills matter most',
-    typicalRoles: ['Software Engineer', 'Full Stack Developer', 'Backend Engineer'],
+    typicalRoles: const ['Software Engineer', 'Full Stack Developer', 'Backend Engineer'],
     region: 'US',
   ),
   CareerSector(
@@ -415,7 +415,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.4,
     targetGPA: 3.7,
     description: 'Analytics and data science roles across industries',
-    typicalRoles: ['Data Scientist', 'ML Engineer', 'Analytics Manager'],
+    typicalRoles: const ['Data Scientist', 'ML Engineer', 'Analytics Manager'],
     region: 'US',
   ),
   CareerSector(
@@ -426,7 +426,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.4,
     targetGPA: 3.6,
     description: 'Big 4 and regional accounting firms',
-    typicalRoles: ['Staff Accountant', 'Audit Associate', 'Tax Consultant'],
+    typicalRoles: const ['Staff Accountant', 'Audit Associate', 'Tax Consultant'],
     region: 'US',
   ),
   CareerSector(
@@ -437,7 +437,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.0,
     targetGPA: 3.5,
     description: 'Federal agencies and civil service positions',
-    typicalRoles: ['Policy Analyst', 'Program Manager', 'Research Specialist'],
+    typicalRoles: const ['Policy Analyst', 'Program Manager', 'Research Specialist'],
     region: 'US',
   ),
   CareerSector(
@@ -448,7 +448,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.7,
     targetGPA: 3.9,
     description: 'PhD programs and research positions at top universities',
-    typicalRoles: ['PhD Candidate', 'Research Assistant', 'Postdoc'],
+    typicalRoles: const ['PhD Candidate', 'Research Assistant', 'Postdoc'],
     region: 'US',
   ),
   CareerSector(
@@ -459,7 +459,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.7,
     targetGPA: 3.9,
     description: 'Top 14 law schools - highly selective',
-    typicalRoles: ['Law Student', 'Legal Intern', 'Associate Attorney'],
+    typicalRoles: const ['Law Student', 'Legal Intern', 'Associate Attorney'],
     region: 'US',
   ),
   CareerSector(
@@ -470,7 +470,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.2,
     targetGPA: 3.6,
     description: 'Hospital and healthcare system management',
-    typicalRoles: ['Healthcare Administrator', 'Operations Manager', 'Program Director'],
+    typicalRoles: const ['Healthcare Administrator', 'Operations Manager', 'Program Director'],
     region: 'US',
   ),
   CareerSector(
@@ -481,7 +481,7 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.0,
     targetGPA: 3.5,
     description: 'Marketing roles in consumer goods and agencies',
-    typicalRoles: ['Brand Manager', 'Marketing Analyst', 'Digital Marketing Specialist'],
+    typicalRoles: const ['Brand Manager', 'Marketing Analyst', 'Digital Marketing Specialist'],
     region: 'US',
   ),
 ];
@@ -608,54 +608,4 @@ class SectorComparisonItem {
     required this.gapToCompetitive,
     required this.relativeDifficulty,
   });
-}
-
-// Reuse from previous domain models
-class CareerSector {
-  final String id;
-  final String name;
-  final String category;
-  final double minimumGPA;
-  final double competitiveGPA;
-  final double targetGPA;
-  final String description;
-  final List<String> typicalRoles;
-  final String region;
-
-  const CareerSector({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.minimumGPA,
-    required this.competitiveGPA,
-    required this.targetGPA,
-    required this.description,
-    required this.typicalRoles,
-    this.region = 'Global',
-  });
-
-  double calculateFitScore(double currentGPA) {
-    if (currentGPA < minimumGPA) return 0.0;
-    if (currentGPA >= targetGPA) return 1.0;
-
-    if (currentGPA < competitiveGPA) {
-      return 0.5 * (currentGPA - minimumGPA) / (competitiveGPA - minimumGPA);
-    } else {
-      return 0.5 + 0.5 * (currentGPA - competitiveGPA) / (targetGPA - competitiveGPA);
-    }
-  }
-
-  CareerReadiness getReadiness(double currentGPA) {
-    if (currentGPA < minimumGPA) return CareerReadiness.notReady;
-    if (currentGPA < competitiveGPA) return CareerReadiness.eligible;
-    if (currentGPA < targetGPA) return CareerReadiness.competitive;
-    return CareerReadiness.highlyCompetitive;
-  }
-}
-
-enum CareerReadiness {
-  notReady,
-  eligible,
-  competitive,
-  highlyCompetitive,
 }

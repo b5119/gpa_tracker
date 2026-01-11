@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+/// Career sector with GPA requirements
 class CareerSector extends Equatable {
   final String id;
   final String name;
