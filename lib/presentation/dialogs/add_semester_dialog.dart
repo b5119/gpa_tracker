@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/semester.dart';
 import '../providers/app_providers.dart';
+import 'add_course_dialog.dart';
 
 class AddSemesterDialog extends ConsumerStatefulWidget {
   const AddSemesterDialog({super.key});
@@ -229,34 +230,45 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
 
       final studentId = ref.read(currentStudentIdProvider);
       final newSemester = Semester(
-        id: const Uuid().v4(),
+        id: 'semester_${DateTime.now().millisecondsSinceEpoch}', // Simple ID generation
         studentId: studentId,
         name: _nameController.text.trim(),
         startDate: _startDate,
         endDate: _endDate,
         status: _status,
-        courses: [],
+        courses: const [],
       );
 
-      await ref.read(semestersProvider.notifier).addSemester(newSemester);
+      try {
+        await ref.read(semestersProvider.notifier).addSemester(newSemester);
 
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${newSemester.name} added successfully'),
-            action: SnackBarAction(
-              label: 'Add Course',
-              onPressed: () {
-                // TODO: Open add course dialog
-              },
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${newSemester.name} added successfully'),
+              action: SnackBarAction(
+                label: 'Add Course',
+                onPressed: () {
+                  // Show add course dialog
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AddCourseDialog(semester: newSemester),
+                  );
+                },
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error adding semester: $e')),
+          );
+        }
       }
     }
   }
-
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
   }

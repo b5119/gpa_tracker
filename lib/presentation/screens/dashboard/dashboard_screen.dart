@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../dialogs/add_semester_dialog.dart';
 import '../../providers/app_providers.dart';
 import '../settings/settings_screen.dart';
+import '../../dialogs/add_course_dialog.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -121,16 +123,7 @@ class DashboardScreen extends ConsumerWidget {
   void _showAddSemesterDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Semester'),
-        content: const Text('Feature coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      builder: (context) => const AddSemesterDialog(),
     );
   }
 }
