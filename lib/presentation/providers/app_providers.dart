@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/models/student.dart';
 import '../../domain/models/semester.dart';
 import '../../domain/models/course.dart';
-import '../../domain/models/gpa_record.dart';
 import '../../domain/models/career_sector.dart';
 import '../../domain/entities/grading_config.dart';
 import '../../domain/repositories/student_repository.dart';
@@ -55,7 +54,9 @@ final gpaRepositoryProvider = Provider<GPARepository>((ref) {
   return SQLiteGPARepository(dbService);
 });
 
-final gradingConfigRepositoryProvider = Provider<GradingConfigRepository>((ref) {
+final gradingConfigRepositoryProvider = Provider<GradingConfigRepository>((
+  ref,
+) {
   final dbService = ref.watch(databaseServiceProvider);
   return SQLiteGradingConfigRepository(dbService);
 });
@@ -80,7 +81,9 @@ final careerIntelligenceProvider = Provider<CareerIntelligenceEngine>((ref) {
 // USE CASE PROVIDERS
 // =============================================================================
 
-final calculateAcademicProgressProvider = Provider<CalculateAcademicProgress>((ref) {
+final calculateAcademicProgressProvider = Provider<CalculateAcademicProgress>((
+  ref,
+) {
   return CalculateAcademicProgress();
 });
 
@@ -104,20 +107,25 @@ final predictFutureGPAProvider = Provider<PredictFutureGPA>((ref) {
   return PredictFutureGPA();
 });
 
-final evaluateCareerReadinessProvider = Provider<EvaluateCareerReadiness>((ref) {
+final evaluateCareerReadinessProvider = Provider<EvaluateCareerReadiness>((
+  ref,
+) {
   return EvaluateCareerReadiness();
 });
 
-final evaluateAcademicEligibilityProvider = Provider<EvaluateAcademicEligibility>((ref) {
-  return EvaluateAcademicEligibility();
-});
+final evaluateAcademicEligibilityProvider =
+    Provider<EvaluateAcademicEligibility>((ref) {
+      return EvaluateAcademicEligibility();
+    });
 
 // =============================================================================
 // STATE PROVIDERS
 // =============================================================================
 
 /// Current student ID provider
-final currentStudentIdProvider = StateProvider<String>((ref) => 'default_student');
+final currentStudentIdProvider = StateProvider<String>(
+  (ref) => 'default_student',
+);
 
 // =============================================================================
 // GRADING CONFIG NOTIFIER
@@ -158,9 +166,10 @@ class GradingConfigNotifier extends Notifier<AsyncValue<GradingConfig?>> {
   void refresh() => _loadActiveConfig();
 }
 
-final gradingConfigProvider = NotifierProvider<GradingConfigNotifier, AsyncValue<GradingConfig?>>(
-  GradingConfigNotifier.new,
-);
+final gradingConfigProvider =
+    NotifierProvider<GradingConfigNotifier, AsyncValue<GradingConfig?>>(
+      GradingConfigNotifier.new,
+    );
 
 // =============================================================================
 // STUDENT NOTIFIER
@@ -202,9 +211,10 @@ class StudentNotifier extends Notifier<AsyncValue<Student?>> {
   void refresh() => _loadStudent();
 }
 
-final currentStudentProvider = NotifierProvider<StudentNotifier, AsyncValue<Student?>>(
-  StudentNotifier.new,
-);
+final currentStudentProvider =
+    NotifierProvider<StudentNotifier, AsyncValue<Student?>>(
+      StudentNotifier.new,
+    );
 
 // =============================================================================
 // SEMESTERS NOTIFIER
@@ -270,9 +280,10 @@ class SemestersNotifier extends Notifier<AsyncValue<List<Semester>>> {
   void refresh() => _loadSemesters();
 }
 
-final semestersProvider = NotifierProvider<SemestersNotifier, AsyncValue<List<Semester>>>(
-  SemestersNotifier.new,
-);
+final semestersProvider =
+    NotifierProvider<SemestersNotifier, AsyncValue<List<Semester>>>(
+      SemestersNotifier.new,
+    );
 
 // =============================================================================
 // COMPUTED PROVIDERS (Using Use Cases)
@@ -344,7 +355,7 @@ final academicProgressProvider = Provider<AsyncValue<AcademicProgress>>((ref) {
 
           final earnedCredits = completedSemesters.fold<int>(
             0,
-                (sum, s) => sum + s.earnedCredits,
+            (sum, s) => sum + s.earnedCredits,
           );
 
           final progress = calculateProgress.execute(
@@ -489,7 +500,9 @@ final gpaPredictionProvider = Provider<AsyncValue<PredictionResult>>((ref) {
 });
 
 /// Career readiness using Evaluate Career Readiness use case
-final careerReadinessProvider = Provider<AsyncValue<CareerReadinessReport>>((ref) {
+final careerReadinessProvider = Provider<AsyncValue<CareerReadinessReport>>((
+  ref,
+) {
   final currentGPAAsync = ref.watch(currentGPAProvider);
   final gradingConfigAsync = ref.watch(gradingConfigProvider);
   final evaluateCareerReadiness = ref.watch(evaluateCareerReadinessProvider);
@@ -527,7 +540,9 @@ final careerReadinessProvider = Provider<AsyncValue<CareerReadinessReport>>((ref
 });
 
 /// Academic eligibility using Evaluate Academic Eligibility use case
-final academicEligibilityProvider = Provider<AsyncValue<EligibilityReport>>((ref) {
+final academicEligibilityProvider = Provider<AsyncValue<EligibilityReport>>((
+  ref,
+) {
   final studentAsync = ref.watch(currentStudentProvider);
   final currentGPAAsync = ref.watch(currentGPAProvider);
   final progressAsync = ref.watch(academicProgressProvider);
@@ -585,7 +600,9 @@ final academicEligibilityProvider = Provider<AsyncValue<EligibilityReport>>((ref
 // =============================================================================
 
 /// Performance analysis provider (Legacy - uses old analytics engine)
-final performanceAnalysisProvider = Provider<AsyncValue<PerformanceAnalysis>>((ref) {
+final performanceAnalysisProvider = Provider<AsyncValue<PerformanceAnalysis>>((
+  ref,
+) {
   final semestersAsync = ref.watch(semestersProvider);
   final analytics = ref.watch(analyticsEngineProvider);
 
@@ -639,7 +656,8 @@ List<CareerSector> _getDefaultCareerSectors() {
       minimumGPA: 3.2,
       competitiveGPA: 3.7,
       targetGPA: 3.9,
-      description: 'Highly selective bulge bracket and boutique investment banks',
+      description:
+          'Highly selective bulge bracket and boutique investment banks',
       typicalRoles: ['Analyst', 'Associate', 'M&A Specialist'],
       region: 'US',
     ),
@@ -651,7 +669,11 @@ List<CareerSector> _getDefaultCareerSectors() {
       competitiveGPA: 3.2,
       targetGPA: 3.7,
       description: 'Tech companies (FAANG and startups) - skills matter most',
-      typicalRoles: ['Software Engineer', 'Full Stack Developer', 'Backend Engineer'],
+      typicalRoles: [
+        'Software Engineer',
+        'Full Stack Developer',
+        'Backend Engineer',
+      ],
       region: 'US',
     ),
     const CareerSector(
@@ -684,7 +706,11 @@ List<CareerSector> _getDefaultCareerSectors() {
       competitiveGPA: 3.0,
       targetGPA: 3.5,
       description: 'Federal agencies and civil service positions',
-      typicalRoles: ['Policy Analyst', 'Program Manager', 'Research Specialist'],
+      typicalRoles: [
+        'Policy Analyst',
+        'Program Manager',
+        'Research Specialist',
+      ],
       region: 'US',
     ),
   ];

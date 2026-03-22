@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/course.dart';
 import '../../domain/models/semester.dart';
@@ -97,15 +96,19 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
                             border: OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Required';
                             }
                             final credits = int.tryParse(value);
                             if (credits == null ||
-                                credits < AcademicConstants.minCreditsPerCourse ||
-                                credits > AcademicConstants.maxCreditsPerCourse) {
+                                credits <
+                                    AcademicConstants.minCreditsPerCourse ||
+                                credits >
+                                    AcademicConstants.maxCreditsPerCourse) {
                               return '1-6';
                             }
                             return null;
@@ -115,16 +118,28 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<CourseType>(
-                          value: _courseType,
+                          initialValue: _courseType,
                           decoration: const InputDecoration(
                             labelText: 'Type',
                             border: OutlineInputBorder(),
                           ),
                           items: const [
-                            DropdownMenuItem(value: CourseType.major, child: Text('Major')),
-                            DropdownMenuItem(value: CourseType.minor, child: Text('Minor')),
-                            DropdownMenuItem(value: CourseType.elective, child: Text('Elective')),
-                            DropdownMenuItem(value: CourseType.general, child: Text('General Ed')),
+                            DropdownMenuItem(
+                              value: CourseType.major,
+                              child: Text('Major'),
+                            ),
+                            DropdownMenuItem(
+                              value: CourseType.minor,
+                              child: Text('Minor'),
+                            ),
+                            DropdownMenuItem(
+                              value: CourseType.elective,
+                              child: Text('Elective'),
+                            ),
+                            DropdownMenuItem(
+                              value: CourseType.general,
+                              child: Text('General Ed'),
+                            ),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -146,7 +161,7 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
                   const SizedBox(height: 16),
 
                   DropdownButtonFormField<String>(
-                    value: _selectedLetterGrade,
+                    initialValue: _selectedLetterGrade,
                     decoration: const InputDecoration(
                       labelText: 'Letter Grade',
                       prefixIcon: Icon(Icons.grade),
@@ -180,11 +195,16 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.getGPAColor(_gradePoint!, maxScale: student.gpaScale)
-                            .withOpacity(0.1),
+                        color: AppColors.getGPAColor(
+                          _gradePoint!,
+                          maxScale: student.gpaScale,
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: AppColors.getGPAColor(_gradePoint!, maxScale: student.gpaScale),
+                          color: AppColors.getGPAColor(
+                            _gradePoint!,
+                            maxScale: student.gpaScale,
+                          ),
                         ),
                       ),
                       child: Row(
@@ -192,7 +212,10 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
                         children: [
                           Icon(
                             Icons.check_circle,
-                            color: AppColors.getGPAColor(_gradePoint!, maxScale: student.gpaScale),
+                            color: AppColors.getGPAColor(
+                              _gradePoint!,
+                              maxScale: student.gpaScale,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -210,7 +233,7 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
+                        color: Colors.orange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.orange),
                       ),

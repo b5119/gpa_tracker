@@ -18,7 +18,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 3, // Incremented version for grading config
+      version: 4, // Incremented version for assessments
       onCreate: _createDatabase,
       onUpgrade: _onUpgrade,
       onConfigure: (db) async {
@@ -109,6 +109,30 @@ class DatabaseService {
       CREATE INDEX idx_courses_semester ON courses(semester_id)
     ''');
 
+    // Assessments table
+    await db.execute('''
+      CREATE TABLE assessments (
+        id TEXT PRIMARY KEY,
+        course_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        weight REAL NOT NULL,
+        total_points REAL NOT NULL,
+        earned_points REAL,
+        due_date TEXT,
+        submitted_date TEXT,
+        FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_assessments_course ON assessments(course_id)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_assessments_type ON assessments(type)
+    ''');
+
     // GPA records table
     await db.execute('''
       CREATE TABLE gpa_records (
@@ -180,6 +204,45 @@ class DatabaseService {
         CREATE INDEX idx_students_grading_config ON students(grading_config_id)
       ''');
     }
+
+    // Migration to version 4: assessments table
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE assessments (
+          id TEXT PRIMARY KEY,
+          course_id TEXT NOT NULL,
+          name TEXT NOT NULL,
+          type TEXT NOT NULL,
+          weight REAL NOT NULL,
+          total_points REAL NOT NULL,
+          earned_points REAL,
+          due_date TEXT,
+          submitted_date TEXT,
+          FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        )
+      ''');
+
+      await db.execute('''
+        CREATE INDEX idx_assessments_course ON assessments(course_id)
+      ''');
+
+      await db.execute('''
+        CREATE INDEX idx_assessments_type ON assessments(type)
+      ''');
+
+      // Seed sample data (demo)
+      await db.insert('assessments', {
+        'id': 'seed_assessment_1',
+        'course_id': 'seed_course_1',
+        'name': 'Midterm Exam',
+        'type': 'midterm',
+        'weight': 30.0,
+        'total_points': 100.0,
+        'earned_points': 85.0,
+        'due_date': DateTime.now().toIso8601String(),
+        'submitted_date': DateTime.now().toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
   }
 
   /// Close database connection
@@ -215,7 +278,10 @@ class DatabaseService {
   /// Get all grading configurations
   Future<List<Map<String, dynamic>>> getGradingConfigs() async {
     final db = await database;
-    return await db.query('grading_configs', orderBy: 'is_default DESC, name ASC');
+    return await db.query(
+      'grading_configs',
+      orderBy: 'is_default DESC, name ASC',
+    );
   }
 
   /// Get default grading configuration
@@ -259,7 +325,10 @@ class DatabaseService {
   }
 
   /// Update grading configuration
-  Future<void> updateGradingConfig(String id, Map<String, dynamic> config) async {
+  Future<void> updateGradingConfig(
+    String id,
+    Map<String, dynamic> config,
+  ) async {
     final db = await database;
     await db.update(
       'grading_configs',
@@ -282,14 +351,10 @@ class DatabaseService {
 
     if (students.isNotEmpty) {
       throw Exception(
-          'Cannot delete grading config: ${students.length} student(s) are using it'
+        'Cannot delete grading config: ${students.length} student(s) are using it',
       );
     }
 
-    await db.delete(
-      'grading_configs',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('grading_configs', where: 'id = ?', whereArgs: [id]);
   }
 }

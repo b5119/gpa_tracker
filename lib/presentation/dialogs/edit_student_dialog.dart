@@ -74,10 +74,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 // Personal Information Section
                 const Text(
                   'Personal Information',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
 
@@ -120,10 +117,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 // Program Information Section
                 const Text(
                   'Program Information',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
 
@@ -145,7 +139,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<ProgramType>(
-                  value: _programType,
+                  initialValue: _programType,
                   decoration: const InputDecoration(
                     labelText: 'Program Type',
                     prefixIcon: Icon(Icons.workspace_premium),
@@ -162,7 +156,8 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                       setState(() {
                         _programType = value;
                         _programDurationYears = value.typicalDurationYears;
-                        _durationController.text = _programDurationYears.toString();
+                        _durationController.text = _programDurationYears
+                            .toString();
                       });
                     }
                   },
@@ -224,10 +219,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 // Enrollment Details Section
                 const Text(
                   'Enrollment Details',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
 
@@ -246,7 +238,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<AcademicTerm>(
-                  value: _startTerm,
+                  initialValue: _startTerm,
                   decoration: const InputDecoration(
                     labelText: 'Starting Term',
                     prefixIcon: Icon(Icons.event_available),
@@ -269,22 +261,22 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 // Grading Configuration Section
                 const Text(
                   'Grading Configuration',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
 
                 DropdownButtonFormField<double>(
-                  value: _gpaScale,
+                  initialValue: _gpaScale,
                   decoration: const InputDecoration(
                     labelText: 'GPA Scale',
                     prefixIcon: Icon(Icons.speed),
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 4.0, child: Text('4.0 Scale (Standard)')),
+                    DropdownMenuItem(
+                      value: 4.0,
+                      child: Text('4.0 Scale (Standard)'),
+                    ),
                     DropdownMenuItem(value: 5.0, child: Text('5.0 Scale')),
                   ],
                   onChanged: (value) {
@@ -296,7 +288,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<RetakePolicy>(
-                  value: _retakePolicy,
+                  initialValue: _retakePolicy,
                   decoration: const InputDecoration(
                     labelText: 'Retake Policy',
                     prefixIcon: Icon(Icons.replay),
@@ -332,10 +324,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: _saveStudent,
-          child: const Text('Save'),
-        ),
+        ElevatedButton(onPressed: _saveStudent, child: const Text('Save')),
       ],
     );
   }
@@ -387,7 +376,8 @@ class CreateStudentDialog extends ConsumerStatefulWidget {
   const CreateStudentDialog({super.key});
 
   @override
-  ConsumerState<CreateStudentDialog> createState() => _CreateStudentDialogState();
+  ConsumerState<CreateStudentDialog> createState() =>
+      _CreateStudentDialogState();
 }
 
 class _CreateStudentDialogState extends ConsumerState<CreateStudentDialog> {
@@ -488,7 +478,7 @@ class _CreateStudentDialogState extends ConsumerState<CreateStudentDialog> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<ProgramType>(
-                  value: _programType,
+                  initialValue: _programType,
                   decoration: const InputDecoration(
                     labelText: 'Program Type *',
                     prefixIcon: Icon(Icons.workspace_premium),
@@ -505,7 +495,8 @@ class _CreateStudentDialogState extends ConsumerState<CreateStudentDialog> {
                       setState(() {
                         _programType = value;
                         _programDurationYears = value.typicalDurationYears;
-                        _durationController.text = _programDurationYears.toString();
+                        _durationController.text = _programDurationYears
+                            .toString();
                       });
                     }
                   },
@@ -565,7 +556,7 @@ class _CreateStudentDialogState extends ConsumerState<CreateStudentDialog> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<AcademicTerm>(
-                  value: _startTerm,
+                  initialValue: _startTerm,
                   decoration: const InputDecoration(
                     labelText: 'Starting Term *',
                     prefixIcon: Icon(Icons.event_available),
@@ -586,14 +577,17 @@ class _CreateStudentDialogState extends ConsumerState<CreateStudentDialog> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<double>(
-                  value: _gpaScale,
+                  initialValue: _gpaScale,
                   decoration: const InputDecoration(
                     labelText: 'GPA Scale',
                     prefixIcon: Icon(Icons.speed),
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 4.0, child: Text('4.0 Scale (Standard)')),
+                    DropdownMenuItem(
+                      value: 4.0,
+                      child: Text('4.0 Scale (Standard)'),
+                    ),
                     DropdownMenuItem(value: 5.0, child: Text('5.0 Scale')),
                   ],
                   onChanged: (value) {

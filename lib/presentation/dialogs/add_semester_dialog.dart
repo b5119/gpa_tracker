@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/semester.dart';
 import '../providers/app_providers.dart';
@@ -61,7 +60,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _semesterType,
+                      initialValue: _semesterType,
                       decoration: const InputDecoration(
                         labelText: 'Type',
                         border: OutlineInputBorder(),
@@ -83,14 +82,17 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: DropdownButtonFormField<int>(
-                      value: _year,
+                      initialValue: _year,
                       decoration: const InputDecoration(
                         labelText: 'Year',
                         border: OutlineInputBorder(),
                       ),
                       items: List.generate(10, (index) {
                         final year = DateTime.now().year - 2 + index;
-                        return DropdownMenuItem(value: year, child: Text('$year'));
+                        return DropdownMenuItem(
+                          value: year,
+                          child: Text('$year'),
+                        );
                       }),
                       onChanged: (value) {
                         if (value != null) {
@@ -148,7 +150,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
 
               // Status
               DropdownButtonFormField<SemesterStatus>(
-                value: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'Status',
                   prefixIcon: Icon(Icons.flag),
@@ -262,13 +264,14 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error adding semester: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error adding semester: $e')));
         }
       }
     }
   }
+
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
   }

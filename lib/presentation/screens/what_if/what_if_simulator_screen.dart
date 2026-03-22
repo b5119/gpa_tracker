@@ -7,9 +7,7 @@ class WhatIfSimulatorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('What-If Simulator'),
-      ),
+      appBar: AppBar(title: const Text('What-If Simulator')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(UIConstants.paddingLarge),
@@ -19,7 +17,9 @@ class WhatIfSimulatorScreen extends StatelessWidget {
               Icon(
                 Icons.science_outlined,
                 size: 100,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.5),
               ),
               const SizedBox(height: UIConstants.paddingLarge),
               Text(
@@ -31,17 +31,17 @@ class WhatIfSimulatorScreen extends StatelessWidget {
               const SizedBox(height: UIConstants.paddingMedium),
               Text(
                 'Feature coming soon!',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: UIConstants.paddingSmall),
               Text(
                 'Test hypothetical grade scenarios and see how they would affect your GPA.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],

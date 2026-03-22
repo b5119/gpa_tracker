@@ -42,9 +42,9 @@ class CareerIntelligenceScreen extends ConsumerWidget {
                 const SizedBox(height: UIConstants.paddingMedium),
                 Text(
                   'Top Recommendations',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: UIConstants.paddingSmall),
                 ...report.topRecommendations.map((analysis) {
@@ -53,9 +53,9 @@ class CareerIntelligenceScreen extends ConsumerWidget {
                 const SizedBox(height: UIConstants.paddingMedium),
                 Text(
                   'All Sectors',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: UIConstants.paddingSmall),
                 ...report.allSectors.map((analysis) {
@@ -101,63 +101,59 @@ class _OverallAssessmentCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(UIConstants.paddingLarge),
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-        Row(
-        children: [
-        Text(
-        'Current GPA: ${currentGPA.toStringAsFixed(2)}',
-        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      const Spacer(),
-      Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: UIConstants.paddingMedium,
-          vertical: UIConstants.paddingSmall,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.getGPAColor(currentGPA),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          _getGPATier(currentGPA),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      ],
-    ),
-    const SizedBox(height: UIConstants.paddingMedium),
-    Text
-      (
-      assessment,
-      style: Theme.of(context).textTheme.bodyLarge,
-    ),
-              const SizedBox(height: UIConstants.paddingMedium),
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatChip(
-                      label: 'Competitive',
-                      value: competitiveSectors.toString(),
-                      color: Colors.green,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Current GPA: ${currentGPA.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: UIConstants.paddingMedium,
+                    vertical: UIConstants.paddingSmall,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.getGPAColor(currentGPA),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _getGPATier(currentGPA),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: UIConstants.paddingSmall),
-                  Expanded(
-                    child: _StatChip(
-                      label: 'Reachable',
-                      value: reachableSectors.toString(),
-                      color: Colors.orange,
-                    ),
+                ),
+              ],
+            ),
+            const SizedBox(height: UIConstants.paddingMedium),
+            Text(assessment, style: Theme.of(context).textTheme.bodyLarge),
+            const SizedBox(height: UIConstants.paddingMedium),
+            Row(
+              children: [
+                Expanded(
+                  child: _StatChip(
+                    label: 'Competitive',
+                    value: competitiveSectors.toString(),
+                    color: Colors.green,
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(width: UIConstants.paddingSmall),
+                Expanded(
+                  child: _StatChip(
+                    label: 'Reachable',
+                    value: reachableSectors.toString(),
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -188,7 +184,7 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(UIConstants.paddingMedium),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(UIConstants.radiusMedium),
         border: Border.all(color: color),
       ),
@@ -202,10 +198,7 @@ class _StatChip extends StatelessWidget {
               color: color,
             ),
           ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );
@@ -301,6 +294,7 @@ class _SectorCard extends StatelessWidget {
     );
   }
 }
+
 class _GPARequirement extends StatelessWidget {
   final String label;
   final double gpa;
@@ -319,10 +313,7 @@ class _GPARequirement extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 8),
           Text(

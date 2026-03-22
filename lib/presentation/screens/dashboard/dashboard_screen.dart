@@ -4,7 +4,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../dialogs/add_semester_dialog.dart';
 import '../../providers/app_providers.dart';
 import '../settings/settings_screen.dart';
-import '../../dialogs/add_course_dialog.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -29,9 +28,7 @@ class DashboardScreen extends ConsumerWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
@@ -204,7 +201,7 @@ class _GPAHeroCard extends StatelessWidget {
             const SizedBox(height: UIConstants.paddingSmall),
             LinearProgressIndicator(
               value: gpa / GPAScales.scale4Point0,
-              backgroundColor: Colors.white.withOpacity(0.3),
+              backgroundColor: Colors.white.withValues(alpha: 0.3),
               valueColor: AlwaysStoppedAnimation<Color>(gpaColor),
               minHeight: 8,
               borderRadius: BorderRadius.circular(4),
@@ -233,7 +230,7 @@ class _QuickStatsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalCredits = semesters.fold<int>(
       0,
-          (sum, semester) => sum + (semester.totalCredits as int? ?? 0),
+      (sum, semester) => sum + (semester.totalCredits as int? ?? 0),
     );
 
     return Row(
@@ -271,7 +268,7 @@ class _QuickStatsSection extends StatelessWidget {
   int _getTotalCourses(List semesters) {
     return semesters.fold<int>(
       0,
-          (sum, semester) => sum + (semester.courses?.length as int? ?? 0),
+      (sum, semester) => sum + (semester.courses?.length as int? ?? 0),
     );
   }
 }
@@ -300,9 +297,9 @@ class _QuickStatCard extends StatelessWidget {
             const SizedBox(height: UIConstants.paddingSmall),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
@@ -321,10 +318,7 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final Widget? action;
 
-  const _SectionHeader({
-    required this.title,
-    this.action,
-  });
+  const _SectionHeader({required this.title, this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -333,9 +327,9 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         if (action != null) action!,
       ],
@@ -365,7 +359,9 @@ class _SemesterCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(
-          backgroundColor: gpa != null ? AppColors.getGPAColor(gpa!) : Colors.grey,
+          backgroundColor: gpa != null
+              ? AppColors.getGPAColor(gpa!)
+              : Colors.grey,
           child: Text(
             gpa?.toStringAsFixed(1) ?? '--',
             style: const TextStyle(
@@ -394,9 +390,7 @@ class _LoadingCard extends StatelessWidget {
     return const Card(
       child: Padding(
         padding: EdgeInsets.all(UIConstants.paddingLarge),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       ),
     );
   }
@@ -418,10 +412,7 @@ class _ErrorCard extends StatelessWidget {
             const Icon(Icons.error_outline, color: Colors.red),
             const SizedBox(width: UIConstants.paddingSmall),
             Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(color: Colors.red),
-              ),
+              child: Text(message, style: const TextStyle(color: Colors.red)),
             ),
           ],
         ),
@@ -458,9 +449,9 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: UIConstants.paddingMedium),
             Text(
               message,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.grey,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Colors.grey),
             ),
             const SizedBox(height: UIConstants.paddingMedium),
             ElevatedButton.icon(

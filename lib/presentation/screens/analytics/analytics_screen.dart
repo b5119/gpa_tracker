@@ -52,7 +52,11 @@ class AnalyticsScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: UIConstants.paddingMedium),
                     Text(
                       'Failed to load analytics',
@@ -76,11 +80,11 @@ class AnalyticsScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('About Analytics'),
         content: const Text(
-            'Statistical analysis of your academic performance including:\n\n'
-                '• Mean GPA: Average performance\n'
-                '• Standard Deviation: Consistency measure\n'
-                '• Trend: Direction of performance\n'
-                '• R²: Reliability of trend'
+          'Statistical analysis of your academic performance including:\n\n'
+          '• Mean GPA: Average performance\n'
+          '• Standard Deviation: Consistency measure\n'
+          '• Trend: Direction of performance\n'
+          '• R²: Reliability of trend',
         ),
         actions: [
           TextButton(
@@ -108,9 +112,9 @@ class _PerformanceMetricsCard extends StatelessWidget {
           children: [
             Text(
               'Performance Metrics',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: UIConstants.paddingMedium),
             _MetricRow(
@@ -147,8 +151,10 @@ class _TrendAnalysisCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isImproving = analysis.trendSlope > StatisticalThresholds.significantTrendSlope;
-    final isDeclining = analysis.trendSlope < -StatisticalThresholds.significantTrendSlope;
+    final isImproving =
+        analysis.trendSlope > StatisticalThresholds.significantTrendSlope;
+    final isDeclining =
+        analysis.trendSlope < -StatisticalThresholds.significantTrendSlope;
 
     Color trendColor;
     IconData trendIcon;
@@ -176,15 +182,15 @@ class _TrendAnalysisCard extends StatelessWidget {
           children: [
             Text(
               'Trend Analysis',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: UIConstants.paddingMedium),
             Container(
               padding: const EdgeInsets.all(UIConstants.paddingMedium),
               decoration: BoxDecoration(
-                color: trendColor.withOpacity(0.1),
+                color: trendColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(UIConstants.radiusMedium),
                 border: Border.all(color: trendColor),
               ),
@@ -237,9 +243,9 @@ class _ConsistencyCard extends StatelessWidget {
           children: [
             Text(
               'Consistency Analysis',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: UIConstants.paddingMedium),
             Text(
@@ -249,9 +255,9 @@ class _ConsistencyCard extends StatelessWidget {
             const SizedBox(height: UIConstants.paddingSmall),
             Text(
               'Based on ${analysis.semesterCount} semesters of data',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
           ],
         ),
@@ -264,10 +270,7 @@ class _MetricRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _MetricRow({
-    required this.label,
-    required this.value,
-  });
+  const _MetricRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -279,10 +282,7 @@ class _MetricRow extends StatelessWidget {
           Text(label),
           Text(
             value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ],
       ),
