@@ -31,7 +31,8 @@ class CareerSector extends Equatable {
     if (currentGPA < competitiveGPA) {
       return 0.5 * (currentGPA - minimumGPA) / (competitiveGPA - minimumGPA);
     } else {
-      return 0.5 + 0.5 * (currentGPA - competitiveGPA) / (targetGPA - competitiveGPA);
+      return 0.5 +
+          0.5 * (currentGPA - competitiveGPA) / (targetGPA - competitiveGPA);
     }
   }
 
@@ -84,9 +85,4 @@ class CareerSector extends Equatable {
   ];
 }
 
-enum CareerReadiness {
-  notReady,
-  eligible,
-  competitive,
-  highlyCompetitive,
-}
+enum CareerReadiness { notReady, eligible, competitive, highlyCompetitive }

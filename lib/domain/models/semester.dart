@@ -38,9 +38,8 @@ class Semester extends Equatable {
 
   int get totalCredits => courses.fold(0, (sum, c) => sum + c.credits);
 
-  int get earnedCredits => courses
-      .where((c) => c.isPassing)
-      .fold(0, (sum, c) => sum + c.credits);
+  int get earnedCredits =>
+      courses.where((c) => c.isPassing).fold(0, (sum, c) => sum + c.credits);
 
   double get completionRate {
     final total = courses.length;
@@ -57,11 +56,12 @@ class Semester extends Equatable {
       startDate: DateTime.parse(json['start_date'] as String),
       endDate: DateTime.parse(json['end_date'] as String),
       status: SemesterStatus.values.firstWhere(
-            (e) => e.toString() == 'SemesterStatus.${json['status']}',
+        (e) => e.toString() == 'SemesterStatus.${json['status']}',
       ),
-      courses: (json['courses'] as List<dynamic>?)
-          ?.map((c) => Course.fromJson(c as Map<String, dynamic>))
-          .toList() ??
+      courses:
+          (json['courses'] as List<dynamic>?)
+              ?.map((c) => Course.fromJson(c as Map<String, dynamic>))
+              .toList() ??
           [],
     );
   }
@@ -97,11 +97,15 @@ class Semester extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, studentId, name, startDate, endDate, status, courses];
+  List<Object?> get props => [
+    id,
+    studentId,
+    name,
+    startDate,
+    endDate,
+    status,
+    courses,
+  ];
 }
 
-enum SemesterStatus {
-  upcoming,
-  inProgress,
-  completed,
-}
+enum SemesterStatus { upcoming, inProgress, completed }

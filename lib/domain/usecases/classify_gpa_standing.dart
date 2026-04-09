@@ -91,9 +91,9 @@ class ClassifyGPAStanding {
 
   /// Get next higher classification
   GPAClassification? _getNextClassification(
-      double currentGPA,
-      List<GPAClassification> classifications,
-      ) {
+    double currentGPA,
+    List<GPAClassification> classifications,
+  ) {
     // Find classifications above current GPA
     final higherClassifications = classifications
         .where((c) => c.minGPA > currentGPA)
@@ -108,9 +108,9 @@ class ClassifyGPAStanding {
 
   /// Determine overall status level
   StandingStatusLevel _determineStatusLevel(
-      GPAClassification current,
-      List<GPAClassification> allClassifications,
-      ) {
+    GPAClassification current,
+    List<GPAClassification> allClassifications,
+  ) {
     // Sort classifications by minGPA descending
     final sorted = allClassifications.toList()
       ..sort((a, b) => b.minGPA.compareTo(a.minGPA));
@@ -136,12 +136,12 @@ class ClassifyGPAStanding {
 
   /// Generate actionable insights
   List<String> _generateInsights(
-      double gpa,
-      GPAClassification current,
-      GPAClassification? next,
-      double distanceToNext,
-      StandingStatusLevel level,
-      ) {
+    double gpa,
+    GPAClassification current,
+    GPAClassification? next,
+    double distanceToNext,
+    StandingStatusLevel level,
+  ) {
     final insights = <String>[];
 
     // Current standing insight
@@ -152,43 +152,55 @@ class ClassifyGPAStanding {
       if (distanceToNext <= 0.1) {
         insights.add(
           'You are very close to ${next.name}! '
-              'Only ${distanceToNext.toStringAsFixed(2)} points away.',
+          'Only ${distanceToNext.toStringAsFixed(2)} points away.',
         );
       } else if (distanceToNext <= 0.3) {
         insights.add(
           'You can reach ${next.name} with consistent performance. '
-              '${distanceToNext.toStringAsFixed(2)} points needed.',
+          '${distanceToNext.toStringAsFixed(2)} points needed.',
         );
       } else {
         insights.add(
           '${next.name} requires ${distanceToNext.toStringAsFixed(2)} more points. '
-              'Focus on high-credit courses for maximum impact.',
+          'Focus on high-credit courses for maximum impact.',
         );
       }
     } else {
-      insights.add('You have achieved the highest classification! Maintain this excellence.');
+      insights.add(
+        'You have achieved the highest classification! Maintain this excellence.',
+      );
     }
 
     // Status-specific insights
     switch (level) {
       case StandingStatusLevel.excellent:
-        insights.add('Outstanding academic performance. You qualify for honors and top opportunities.');
+        insights.add(
+          'Outstanding academic performance. You qualify for honors and top opportunities.',
+        );
         break;
 
       case StandingStatusLevel.strong:
-        insights.add('Strong academic standing. You are competitive for most career paths.');
+        insights.add(
+          'Strong academic standing. You are competitive for most career paths.',
+        );
         break;
 
       case StandingStatusLevel.satisfactory:
-        insights.add('Satisfactory progress. Focus on improving in challenging subjects.');
+        insights.add(
+          'Satisfactory progress. Focus on improving in challenging subjects.',
+        );
         break;
 
       case StandingStatusLevel.atRisk:
-        insights.add('⚠️ At-risk status. Consider academic support services and reduced course load.');
+        insights.add(
+          '⚠️ At-risk status. Consider academic support services and reduced course load.',
+        );
         break;
 
       case StandingStatusLevel.critical:
-        insights.add('🚨 Critical status. Immediate intervention required. Contact your academic advisor.');
+        insights.add(
+          '🚨 Critical status. Immediate intervention required. Contact your academic advisor.',
+        );
         break;
     }
 
@@ -230,9 +242,9 @@ class GPAStandingResult {
 
 /// Overall status level for UI display and alerts
 enum StandingStatusLevel {
-  excellent,      // Top tier, honors eligible
-  strong,         // Good standing, competitive
-  satisfactory,   // Passing, acceptable
-  atRisk,         // Below expectations, needs attention
-  critical,       // Failing, immediate action required
+  excellent, // Top tier, honors eligible
+  strong, // Good standing, competitive
+  satisfactory, // Passing, acceptable
+  atRisk, // Below expectations, needs attention
+  critical, // Failing, immediate action required
 }

@@ -14,9 +14,7 @@ class SettingsScreen extends ConsumerWidget {
     final gradingConfigAsync = ref.watch(gradingConfigProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: studentAsync.when(
         data: (student) {
           if (student == null) {
@@ -57,7 +55,8 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.school,
                 title: 'Program',
-                subtitle: '${student.program} (${student.programType.displayName})',
+                subtitle:
+                    '${student.program} (${student.programType.displayName})',
                 onTap: () => _showEditStudentDialog(context, ref, student),
               ),
               _SettingsTile(
@@ -133,7 +132,11 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditStudentDialog(BuildContext context, WidgetRef ref, Student student) {
+  void _showEditStudentDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Student student,
+  ) {
     showDialog(
       context: context,
       builder: (context) => EditStudentDialog(student: student),
@@ -163,7 +166,9 @@ class SettingsScreen extends ConsumerWidget {
                 groupValue: gradingConfig?.id,
                 onChanged: (value) {
                   if (value != null) {
-                    ref.read(gradingConfigProvider.notifier).setActiveConfig(value);
+                    ref
+                        .read(gradingConfigProvider.notifier)
+                        .setActiveConfig(value);
                     Navigator.pop(context);
                   }
                 },
@@ -177,7 +182,9 @@ class SettingsScreen extends ConsumerWidget {
                 groupValue: gradingConfig?.id,
                 onChanged: (value) {
                   if (value != null) {
-                    ref.read(gradingConfigProvider.notifier).setActiveConfig(value);
+                    ref
+                        .read(gradingConfigProvider.notifier)
+                        .setActiveConfig(value);
                     Navigator.pop(context);
                   }
                 },
@@ -189,7 +196,11 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showRetakePolicyDialog(BuildContext context, WidgetRef ref, Student student) {
+  void _showRetakePolicyDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Student student,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -209,7 +220,9 @@ class SettingsScreen extends ConsumerWidget {
                 onChanged: (value) {
                   if (value != null) {
                     final updated = student.copyWith(retakePolicy: value);
-                    ref.read(currentStudentProvider.notifier).updateStudent(updated);
+                    ref
+                        .read(currentStudentProvider.notifier)
+                        .updateStudent(updated);
                     Navigator.pop(context);
                   }
                 },
@@ -254,7 +267,9 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Reset functionality coming soon')),
+                const SnackBar(
+                  content: Text('Reset functionality coming soon'),
+                ),
               );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -327,10 +342,7 @@ class _SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(
-          icon,
-          color: isDestructive ? Colors.red : null,
-        ),
+        leading: Icon(icon, color: isDestructive ? Colors.red : null),
         title: Text(
           title,
           style: TextStyle(

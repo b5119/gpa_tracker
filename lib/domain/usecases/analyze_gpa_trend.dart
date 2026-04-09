@@ -38,9 +38,7 @@ import 'dart:math' as math;
 /// - Requires investigation
 class AnalyzeGPATrend {
   /// Analyze historical GPA performance
-  TrendAnalysisResult execute({
-    required List<double> semesterGPAs,
-  }) {
+  TrendAnalysisResult execute({required List<double> semesterGPAs}) {
     if (semesterGPAs.isEmpty) {
       return TrendAnalysisResult.empty();
     }
@@ -107,19 +105,17 @@ class AnalyzeGPATrend {
 
     final sumX = xValues.reduce((a, b) => a + b);
     final sumY = yValues.reduce((a, b) => a + b);
-    final sumXY = List.generate(n, (i) => xValues[i] * yValues[i])
-        .reduce((a, b) => a + b);
+    final sumXY = List.generate(
+      n,
+      (i) => xValues[i] * yValues[i],
+    ).reduce((a, b) => a + b);
     final sumX2 = xValues.map((x) => x * x).reduce((a, b) => a + b);
 
     final numerator = (n * sumXY) - (sumX * sumY);
     final denominator = (n * sumX2) - (sumX * sumX);
 
     if (denominator == 0) {
-      return _TrendData(
-        slope: 0.0,
-        intercept: sumY / n,
-        rSquared: 0.0,
-      );
+      return _TrendData(slope: 0.0, intercept: sumY / n, rSquared: 0.0);
     }
 
     final slope = numerator / denominator;
@@ -127,7 +123,9 @@ class AnalyzeGPATrend {
 
     // Calculate R²
     final meanY = sumY / n;
-    final ssTotal = yValues.map((y) => math.pow(y - meanY, 2)).reduce((a, b) => a + b);
+    final ssTotal = yValues
+        .map((y) => math.pow(y - meanY, 2))
+        .reduce((a, b) => a + b);
     final ssResidual = List.generate(n, (i) {
       final predicted = slope * xValues[i] + intercept;
       return math.pow(yValues[i] - predicted, 2);
@@ -168,14 +166,16 @@ class AnalyzeGPATrend {
     for (int i = 1; i < gpas.length; i++) {
       final delta = gpas[i] - gpas[i - 1];
 
-      deltas.add(SemesterDelta(
-        fromSemester: i - 1,
-        toSemester: i,
-        fromGPA: gpas[i - 1],
-        toGPA: gpas[i],
-        change: delta,
-        significance: _categorizeDelta(delta),
-      ));
+      deltas.add(
+        SemesterDelta(
+          fromSemester: i - 1,
+          toSemester: i,
+          fromGPA: gpas[i - 1],
+          toGPA: gpas[i],
+          change: delta,
+          significance: _categorizeDelta(delta),
+        ),
+      );
     }
 
     return deltas;

@@ -17,6 +17,7 @@ import '../../domain/usecases/analyze_gpa_trend.dart';
 import '../../domain/usecases/predict_future_gpa.dart';
 import '../../domain/usecases/evaluate_career_readiness.dart';
 import '../../domain/usecases/evaluate_academic_eligibility.dart';
+import '../../domain/usecases/calculate_course_gpa_from_assessments.dart';
 import '../../domain/services/gpa_calculation_engine.dart';
 import '../../domain/services/analytics_engine.dart';
 import '../../domain/services/career_intelligence_engine.dart';
@@ -25,6 +26,10 @@ import '../../data/repositories/sqlite_student_repository.dart';
 import '../../data/repositories/sqlite_academic_repository.dart';
 import '../../data/repositories/sqlite_gpa_repository.dart';
 import '../../data/repositories/sqlite_grading_config_repository.dart';
+import '../../data/repositories/sqlite_assessment_repository.dart';
+import '../../domain/entities/assessment.dart';
+import '../../domain/entities/grading_schema.dart';
+import '../../domain/repositories/assessment_repository.dart';
 
 // =============================================================================
 // INFRASTRUCTURE PROVIDERS
@@ -59,6 +64,11 @@ final gradingConfigRepositoryProvider = Provider<GradingConfigRepository>((
 ) {
   final dbService = ref.watch(databaseServiceProvider);
   return SQLiteGradingConfigRepository(dbService);
+});
+
+final assessmentRepositoryProvider = Provider<AssessmentRepository>((ref) {
+  final dbService = ref.watch(databaseServiceProvider);
+  return SQLiteAssessmentRepository(dbService);
 });
 
 // =============================================================================
@@ -116,6 +126,11 @@ final evaluateCareerReadinessProvider = Provider<EvaluateCareerReadiness>((
 final evaluateAcademicEligibilityProvider =
     Provider<EvaluateAcademicEligibility>((ref) {
       return EvaluateAcademicEligibility();
+    });
+
+final calculateCourseGPAFromAssessmentsProvider =
+    Provider<CalculateCourseGPAFromAssessments>((ref) {
+      return CalculateCourseGPAFromAssessments();
     });
 
 // =============================================================================
@@ -210,6 +225,127 @@ class StudentNotifier extends Notifier<AsyncValue<Student?>> {
 
   void refresh() => _loadStudent();
 }
+
+class AssessmentsNotifier extends Notifier<AsyncValue<List<Assessment>>> {
+  AssessmentsNotifier(this.courseId);
+
+  final String courseId;
+  late final AssessmentRepository _repository;
+
+  @override
+  AsyncValue<List<Assessment>> build() {
+    _repository = ref.read(assessmentRepositoryProvider);
+    _loadAssessments();
+    return const AsyncValue.loading();
+  }
+
+  Future<void> _loadAssessments() async {
+    state = const AsyncValue.loading();
+    try {
+      final items = await _repository.getAssessmentsByCourse(courseId);
+      state = AsyncValue.data(items);
+    } catch (error, stack) {
+      state = AsyncValue.error(error, stack);
+    }
+  }
+
+  Future<void> loadAssessmentsByCourse(String targetCourseId) async {
+    if (targetCourseId != courseId) return;
+    await _loadAssessments();
+  }
+
+  Future<void> addAssessment(Assessment assessment) async {
+    try {
+      await _repository.saveAssessment(assessment);
+      final current = state.maybeWhen(
+        data: (items) => items,
+        orElse: () => const <Assessment>[],
+      );
+      state = AsyncValue.data([...current, assessment]);
+    } catch (error, stack) {
+      state = AsyncValue.error(error, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> updateAssessment(Assessment assessment) async {
+    try {
+      await _repository.updateAssessment(assessment);
+      final current = state.maybeWhen(
+        data: (items) => items,
+        orElse: () => const <Assessment>[],
+      );
+      state = AsyncValue.data(
+        current.map((a) => a.id == assessment.id ? assessment : a).toList(),
+      );
+    } catch (error, stack) {
+      state = AsyncValue.error(error, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAssessment(String assessmentId) async {
+    try {
+      await _repository.deleteAssessment(assessmentId);
+      final current = state.maybeWhen(
+        data: (items) => items,
+        orElse: () => const <Assessment>[],
+      );
+      state = AsyncValue.data(
+        current.where((a) => a.id != assessmentId).toList(),
+      );
+    } catch (error, stack) {
+      state = AsyncValue.error(error, stack);
+      rethrow;
+    }
+  }
+}
+
+final assessmentsProvider =
+    NotifierProvider.family<
+      AssessmentsNotifier,
+      AsyncValue<List<Assessment>>,
+      String
+    >((courseId) => AssessmentsNotifier(courseId));
+
+final courseGPAProvider = Provider.family<AsyncValue<CourseGPAResult>, String>((
+  ref,
+  courseId,
+) {
+  final assessmentsAsync = ref.watch(assessmentsProvider(courseId));
+  final gradingConfigAsync = ref.watch(gradingConfigProvider);
+  final calculateUseCase = ref.watch(calculateCourseGPAFromAssessmentsProvider);
+
+  return assessmentsAsync.when(
+    data: (assessments) {
+      return gradingConfigAsync.when(
+        data: (config) {
+          if (config == null) {
+            return AsyncValue.error('No grading config', StackTrace.current);
+          }
+
+          // TODO: derive schema from config; placeholder uses percentage bands.
+          final schema = GradingSchema(
+            id: 'default',
+            name: 'Default 4.0',
+            mode: GradingMode.percentage,
+            maxGpa: 4.0,
+            percentageBands: {90: 4.0, 80: 3.0, 70: 2.0, 60: 1.0, 0: 0.0},
+          );
+          final result = calculateUseCase.execute(
+            assessments: assessments,
+            gradingSchema: schema,
+          );
+          return AsyncValue.data(result);
+        },
+        loading: () => const AsyncValue.loading(),
+        error: (e, s) => AsyncValue.error(e, s),
+      );
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (e, s) => AsyncValue.error(e, s),
+  );
+});
 
 final currentStudentProvider =
     NotifierProvider<StudentNotifier, AsyncValue<Student?>>(

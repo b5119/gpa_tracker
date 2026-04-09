@@ -54,8 +54,11 @@ class CalculateCourseGPAFromAssessments {
 
     double weighted = 0;
     for (final a in active) {
-      final percent = (a.pointsEarned! / a.totalPoints) * 100;
-      weighted += percent * (a.weightPercent / 100);
+      // Guard against division by zero
+      if (a.totalPoints > 0) {
+        final percent = (a.pointsEarned! / a.totalPoints) * 100;
+        weighted += percent * (a.weightPercent / 100);
+      }
     }
 
     final normalized =

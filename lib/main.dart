@@ -3,11 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/screens/main_navigation_screen.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: GPATrackerApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: GPATrackerApp()));
 }
 
 class GPATrackerApp extends StatelessWidget {
@@ -24,7 +20,8 @@ class GPATrackerApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        cardTheme: const CardThemeData(  // Changed from CardTheme to CardThemeData
+        cardTheme: const CardThemeData(
+          // Changed from CardTheme to CardThemeData
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -37,7 +34,8 @@ class GPATrackerApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
-        cardTheme: const CardThemeData(  // Changed from CardTheme to CardThemeData
+        cardTheme: const CardThemeData(
+          // Changed from CardTheme to CardThemeData
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),

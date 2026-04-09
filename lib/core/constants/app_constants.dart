@@ -65,28 +65,52 @@ class GPAScales {
 
   // Grade point mapping for 4.0 scale
   static const Map<String, double> gradePoints4_0 = {
-    'A+': 4.0, 'A': 4.0, 'A-': 3.7,
-    'B+': 3.3, 'B': 3.0, 'B-': 2.7,
-    'C+': 2.3, 'C': 2.0, 'C-': 1.7,
-    'D+': 1.3, 'D': 1.0, 'D-': 0.7,
+    'A+': 4.0,
+    'A': 4.0,
+    'A-': 3.7,
+    'B+': 3.3,
+    'B': 3.0,
+    'B-': 2.7,
+    'C+': 2.3,
+    'C': 2.0,
+    'C-': 1.7,
+    'D+': 1.3,
+    'D': 1.0,
+    'D-': 0.7,
     'F': 0.0,
   };
 
   // Grade point mapping for 5.0 scale
   static const Map<String, double> gradePoints5_0 = {
-    'A+': 5.0, 'A': 5.0, 'A-': 4.7,
-    'B+': 4.3, 'B': 4.0, 'B-': 3.7,
-    'C+': 3.3, 'C': 3.0, 'C-': 2.7,
-    'D+': 2.3, 'D': 2.0, 'D-': 1.7,
+    'A+': 5.0,
+    'A': 5.0,
+    'A-': 4.7,
+    'B+': 4.3,
+    'B': 4.0,
+    'B-': 3.7,
+    'C+': 3.3,
+    'C': 3.0,
+    'C-': 2.7,
+    'D+': 2.3,
+    'D': 2.0,
+    'D-': 1.7,
     'F': 0.0,
   };
 
   // Letter grade options
   static const List<String> letterGrades = [
-    'A+', 'A', 'A-',
-    'B+', 'B', 'B-',
-    'C+', 'C', 'C-',
-    'D+', 'D', 'D-',
+    'A+',
+    'A',
+    'A-',
+    'B+',
+    'B',
+    'B-',
+    'C+',
+    'C',
+    'C-',
+    'D+',
+    'D',
+    'D-',
     'F',
   ];
 }
@@ -277,7 +301,8 @@ class TextConstants {
   static const String noDataAvailable = 'No data available';
   static const String noSemestersYet = 'No semesters added yet';
   static const String noCoursesYet = 'No courses added yet';
-  static const String addFirstSemester = 'Add your first semester to get started';
+  static const String addFirstSemester =
+      'Add your first semester to get started';
 
   // Loading States
   static const String loading = 'Loading...';
@@ -298,7 +323,8 @@ class TextConstants {
 
   // Confirmation Messages
   static const String confirmDelete = 'Are you sure you want to delete?';
-  static const String confirmDeleteSemester = 'This will delete all courses in this semester';
+  static const String confirmDeleteSemester =
+      'This will delete all courses in this semester';
   static const String cannotUndo = 'This action cannot be undone';
 
   // Labels

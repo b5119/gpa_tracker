@@ -29,8 +29,7 @@ class CalculateSemesterGPA {
   }) {
     // Filter to only graded courses with credits
     final gradedCourses = courses.where((course) {
-      return course.gradePoint != null &&
-          course.credits > 0;
+      return course.gradePoint != null && course.credits > 0;
     }).toList();
 
     if (gradedCourses.isEmpty) return null;
@@ -46,7 +45,7 @@ class CalculateSemesterGPA {
           gradePoint > gradingConfig.maxGPA) {
         throw ArgumentError(
           'Invalid grade point $gradePoint for grading scale '
-              '${gradingConfig.minGPA}-${gradingConfig.maxGPA}',
+          '${gradingConfig.minGPA}-${gradingConfig.maxGPA}',
         );
       }
 

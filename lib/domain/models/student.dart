@@ -71,8 +71,10 @@ class Student extends Equatable {
 
   /// Is student on track for on-time graduation?
   bool isOnPace(int completedCredits) {
-    final expectedCredits = (totalCreditsRequired *
-        (semestersSinceEnrollment / (programDurationYears * 2))).round();
+    final expectedCredits =
+        (totalCreditsRequired *
+                (semestersSinceEnrollment / (programDurationYears * 2)))
+            .round();
     return completedCredits >= (expectedCredits * 0.9); // 10% tolerance
   }
 
@@ -97,19 +99,19 @@ class Student extends Equatable {
       email: json['email'] as String,
       program: json['program'] as String,
       programType: ProgramType.values.firstWhere(
-            (e) => e.toString() == 'ProgramType.${json['program_type']}',
+        (e) => e.toString() == 'ProgramType.${json['program_type']}',
         orElse: () => ProgramType.bachelors,
       ),
       programDurationYears: json['program_duration_years'] as int? ?? 4,
       enrollmentDate: DateTime.parse(json['enrollment_date'] as String),
       startTerm: AcademicTerm.values.firstWhere(
-            (e) => e.toString() == 'AcademicTerm.${json['start_term']}',
+        (e) => e.toString() == 'AcademicTerm.${json['start_term']}',
         orElse: () => AcademicTerm.fall,
       ),
       gpaScale: (json['gpa_scale'] as num).toDouble(),
       totalCreditsRequired: json['total_credits_required'] as int,
       retakePolicy: RetakePolicy.values.firstWhere(
-            (e) => e.toString() == 'RetakePolicy.${json['retake_policy']}',
+        (e) => e.toString() == 'RetakePolicy.${json['retake_policy']}',
         orElse: () => RetakePolicy.replace,
       ),
     );
@@ -160,8 +162,17 @@ class Student extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, name, email, program, programType, programDurationYears,
-    enrollmentDate, startTerm, gpaScale, totalCreditsRequired, retakePolicy,
+    id,
+    name,
+    email,
+    program,
+    programType,
+    programDurationYears,
+    enrollmentDate,
+    startTerm,
+    gpaScale,
+    totalCreditsRequired,
+    retakePolicy,
   ];
 }
 
@@ -174,26 +185,26 @@ class Student extends Equatable {
 /// - Diploma: 2-3 years, vocational, practical focus
 /// - Certificate: < 1 year, skill-specific, completion-focused
 enum ProgramType {
-  certificate,   // < 1 year, skill credential
-  diploma,       // 2-3 years, technical/vocational
-  bachelors,     // 3-4 years, undergraduate degree
-  honours,       // 4-5 years, research component
-  masters,       // 1-2 years, postgraduate
-  doctorate,     // 3-7 years, PhD/professional doctorate
+  certificate, // < 1 year, skill credential
+  diploma, // 2-3 years, technical/vocational
+  bachelors, // 3-4 years, undergraduate degree
+  honours, // 4-5 years, research component
+  masters, // 1-2 years, postgraduate
+  doctorate, // 3-7 years, PhD/professional doctorate
 }
 
 /// Academic term/semester designation
 enum AcademicTerm {
-  fall,     // August - December
-  spring,   // January - May
-  summer,   // May - August (optional)
-  winter,   // December - January (optional)
+  fall, // August - December
+  spring, // January - May
+  summer, // May - August (optional)
+  winter, // December - January (optional)
 }
 
 enum RetakePolicy {
-  replace,  // Most recent grade replaces all
-  average,  // Average all attempts
-  best,     // Highest grade counts
+  replace, // Most recent grade replaces all
+  average, // Average all attempts
+  best, // Highest grade counts
 }
 
 /// Extension helpers for display

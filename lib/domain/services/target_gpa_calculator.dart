@@ -79,7 +79,7 @@ class TargetGpaCalculator {
 
     final requiredFutureGpa =
         ((targetCgpa * totalCredits) - currentGradePoints) / remainingCredits;
-    final cappedRequired = requiredFutureGpa.clamp(0.0, maxGpa) as double;
+    final cappedRequired = requiredFutureGpa.clamp(0.0, maxGpa);
     final achievable = requiredFutureGpa <= maxGpa;
 
     final upcomingSemesters = semesters

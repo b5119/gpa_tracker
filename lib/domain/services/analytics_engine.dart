@@ -85,7 +85,9 @@ class GPAAnalyticsEngine {
   double _calculateStandardDeviation(List<double> values, double mean) {
     if (values.length < 2) return 0.0;
 
-    final squaredDifferences = values.map((x) => math.pow(x - mean, 2)).toList();
+    final squaredDifferences = values
+        .map((x) => math.pow(x - mean, 2))
+        .toList();
     final variance = squaredDifferences.reduce((a, b) => a + b) / values.length;
 
     return math.sqrt(variance);
@@ -125,8 +127,10 @@ class GPAAnalyticsEngine {
     // Calculate sums needed for regression
     final sumX = xValues.reduce((a, b) => a + b);
     final sumY = yValues.reduce((a, b) => a + b);
-    final sumXY = List.generate(n, (i) => xValues[i] * yValues[i])
-        .reduce((a, b) => a + b);
+    final sumXY = List.generate(
+      n,
+      (i) => xValues[i] * yValues[i],
+    ).reduce((a, b) => a + b);
     final sumX2 = xValues.map((x) => x * x).reduce((a, b) => a + b);
 
     // Calculate slope (m)
@@ -144,7 +148,9 @@ class GPAAnalyticsEngine {
 
     // Calculate R² (coefficient of determination)
     final meanY = sumY / n;
-    final ssTotal = yValues.map((y) => math.pow(y - meanY, 2)).reduce((a, b) => a + b);
+    final ssTotal = yValues
+        .map((y) => math.pow(y - meanY, 2))
+        .reduce((a, b) => a + b);
     final ssResidual = List.generate(n, (i) {
       final predicted = slope * xValues[i] + intercept;
       return math.pow(yValues[i] - predicted, 2);
@@ -174,9 +180,9 @@ class GPAAnalyticsEngine {
   /// - Declining: Urgent investigation required
   /// - Volatile: Address consistency issues first
   PerformanceClassification _classifyPerformance(
-      TrendResult trend,
-      double stdDev,
-      ) {
+    TrendResult trend,
+    double stdDev,
+  ) {
     const slopeThreshold = 0.05; // Significant change per semester
     const volatilityThreshold = 0.3; // High variability
 
@@ -236,7 +242,8 @@ class GPAAnalyticsEngine {
 
     // Project trend line forward
     final futureIndex = historicalGPAs.length + semestersAhead - 1;
-    final predicted = analysis.trendSlope * futureIndex + analysis.trendIntercept;
+    final predicted =
+        analysis.trendSlope * futureIndex + analysis.trendIntercept;
 
     // Calculate confidence based on R² and data points
     final confidence = _calculateConfidence(
@@ -397,14 +404,16 @@ class GPAAnalyticsEngine {
       final delta = semesterGPAs[i] - semesterGPAs[i - 1];
       final significance = _categorizeDelta(delta);
 
-      deltas.add(SemesterDelta(
-        fromSemester: i - 1,
-        toSemester: i,
-        fromGPA: semesterGPAs[i - 1],
-        toGPA: semesterGPAs[i],
-        change: delta,
-        significance: significance,
-      ));
+      deltas.add(
+        SemesterDelta(
+          fromSemester: i - 1,
+          toSemester: i,
+          fromGPA: semesterGPAs[i - 1],
+          toGPA: semesterGPAs[i],
+          change: delta,
+          significance: significance,
+        ),
+      );
     }
 
     return deltas;

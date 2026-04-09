@@ -3,6 +3,7 @@ import '../../../domain/repositories/academic_repository.dart';
 import '../../../domain/models/semester.dart';
 import '../../../domain/models/course.dart';
 import '../datasources/local/database_service.dart';
+
 class SQLiteAcademicRepository implements AcademicRepository {
   final DatabaseService _dbService;
 
@@ -89,11 +90,7 @@ class SQLiteAcademicRepository implements AcademicRepository {
   @override
   Future<void> deleteSemester(String id) async {
     final db = await _dbService.database;
-    await db.delete(
-      'semesters',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('semesters', where: 'id = ?', whereArgs: [id]);
     // Courses cascade delete automatically
   }
 
@@ -133,10 +130,6 @@ class SQLiteAcademicRepository implements AcademicRepository {
   @override
   Future<void> deleteCourse(String id) async {
     final db = await _dbService.database;
-    await db.delete(
-      'courses',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('courses', where: 'id = ?', whereArgs: [id]);
   }
 }

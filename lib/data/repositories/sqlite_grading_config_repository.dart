@@ -79,11 +79,7 @@ class SQLiteGradingConfigRepository implements GradingConfigRepository {
   Future<void> deleteConfig(String id) async {
     final db = await _dbService.database;
 
-    await db.delete(
-      'grading_configs',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('grading_configs', where: 'id = ?', whereArgs: [id]);
   }
 
   @override
@@ -91,10 +87,7 @@ class SQLiteGradingConfigRepository implements GradingConfigRepository {
     final db = await _dbService.database;
 
     // Deactivate all configs
-    await db.update(
-      'grading_configs',
-      {'is_default': 0},
-    );
+    await db.update('grading_configs', {'is_default': 0});
 
     // Activate selected config
     await db.update(

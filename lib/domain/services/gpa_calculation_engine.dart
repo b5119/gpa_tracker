@@ -14,6 +14,7 @@
 
 import 'dart:math' as math;
 import '../models/student.dart'; // Added this line to import RetakePolicy
+
 /// Core GPA calculation service following domain-driven design principles.
 ///
 /// This service is stateless and pure - all calculations are deterministic
@@ -21,19 +22,35 @@ import '../models/student.dart'; // Added this line to import RetakePolicy
 class GPACalculationEngine {
   /// Grade point mapping for standard letter grades on 4.0 scale
   static const Map<String, double> standardGradePoints4_0 = {
-    'A+': 4.0, 'A': 4.0, 'A-': 3.7,
-    'B+': 3.3, 'B': 3.0, 'B-': 2.7,
-    'C+': 2.3, 'C': 2.0, 'C-': 1.7,
-    'D+': 1.3, 'D': 1.0, 'D-': 0.7,
+    'A+': 4.0,
+    'A': 4.0,
+    'A-': 3.7,
+    'B+': 3.3,
+    'B': 3.0,
+    'B-': 2.7,
+    'C+': 2.3,
+    'C': 2.0,
+    'C-': 1.7,
+    'D+': 1.3,
+    'D': 1.0,
+    'D-': 0.7,
     'F': 0.0,
   };
 
   /// Grade point mapping for 5.0 scale (some institutions)
   static const Map<String, double> standardGradePoints5_0 = {
-    'A+': 5.0, 'A': 5.0, 'A-': 4.7,
-    'B+': 4.3, 'B': 4.0, 'B-': 3.7,
-    'C+': 3.3, 'C': 3.0, 'C-': 2.7,
-    'D+': 2.3, 'D': 2.0, 'D-': 1.7,
+    'A+': 5.0,
+    'A': 5.0,
+    'A-': 4.7,
+    'B+': 4.3,
+    'B': 4.0,
+    'B-': 3.7,
+    'C+': 3.3,
+    'C': 3.0,
+    'C-': 2.7,
+    'D+': 2.3,
+    'D': 2.0,
+    'D-': 1.7,
     'F': 0.0,
   };
 
@@ -47,11 +64,10 @@ class GPACalculationEngine {
   GPACalculationEngine({
     double gpaScale = 4.0,
     Map<String, double>? customGradePoints,
-  })  : _gpaScale = gpaScale,
-        _gradePointMap = customGradePoints ??
-            (gpaScale == 5.0
-                ? standardGradePoints5_0
-                : standardGradePoints4_0);
+  }) : _gpaScale = gpaScale,
+       _gradePointMap =
+           customGradePoints ??
+           (gpaScale == 5.0 ? standardGradePoints5_0 : standardGradePoints4_0);
 
   // ===========================================================================
   // CORE GPA CALCULATION METHODS
@@ -86,7 +102,9 @@ class GPACalculationEngine {
 
     for (final course in gradedCourses) {
       if (course.credits < 0) {
-        throw ArgumentError('Course credits cannot be negative: ${course.credits}');
+        throw ArgumentError(
+          'Course credits cannot be negative: ${course.credits}',
+        );
       }
 
       totalQualityPoints += course.gradePoint! * course.credits;
@@ -117,9 +135,9 @@ class GPACalculationEngine {
   /// [retakePolicy] - How to handle repeated courses
   /// Returns: Cumulative GPA result with metadata
   CumulativeGPAResult calculateCumulativeGPA(
-      Map<String, List<CourseGrade>> semesterCourses,
-      RetakePolicy retakePolicy,
-      ) {
+    Map<String, List<CourseGrade>> semesterCourses,
+    RetakePolicy retakePolicy,
+  ) {
     // Flatten all courses across semesters
     final allCourses = semesterCourses.values.expand((c) => c).toList();
 
@@ -144,7 +162,7 @@ class GPACalculationEngine {
 
     final totalCreditsAttempted = finalCourses.fold<int>(
       0,
-          (sum, c) => sum + c.credits,
+      (sum, c) => sum + c.credits,
     );
 
     final totalCreditsEarned = finalCourses
@@ -169,26 +187,27 @@ class GPACalculationEngine {
   ///
   /// Returns the course that should count toward GPA calculation.
   CourseGrade? _applyRetakePolicy(
-      List<CourseGrade> attempts,
-      RetakePolicy policy,
-      ) {
+    List<CourseGrade> attempts,
+    RetakePolicy policy,
+  ) {
     if (attempts.isEmpty) return null;
     if (attempts.length == 1) return attempts.first;
 
     // Filter to only graded attempts
     final gradedAttempts = attempts.where((a) => a.gradePoint != null).toList();
-    if (gradedAttempts.isEmpty) return attempts.last; // Return most recent even if ungraded
+    if (gradedAttempts.isEmpty)
+      return attempts.last; // Return most recent even if ungraded
 
     switch (policy) {
       case RetakePolicy.replace:
-      // Return most recent graded attempt
+        // Return most recent graded attempt
         return gradedAttempts.last;
 
       case RetakePolicy.average:
-      // Create synthetic course with averaged grade
-        final avgGrade = gradedAttempts
-            .map((a) => a.gradePoint!)
-            .reduce((a, b) => a + b) / gradedAttempts.length;
+        // Create synthetic course with averaged grade
+        final avgGrade =
+            gradedAttempts.map((a) => a.gradePoint!).reduce((a, b) => a + b) /
+            gradedAttempts.length;
 
         return CourseGrade(
           courseCode: gradedAttempts.first.courseCode,
@@ -199,10 +218,10 @@ class GPACalculationEngine {
         );
 
       case RetakePolicy.best:
-      // Return attempt with highest grade
+        // Return attempt with highest grade
         return gradedAttempts.reduce(
-              (best, current) =>
-          current.gradePoint! > best.gradePoint! ? current : best,
+          (best, current) =>
+              current.gradePoint! > best.gradePoint! ? current : best,
         );
     }
   }
@@ -280,7 +299,8 @@ class GPACalculationEngine {
     String reason = '';
     if (!isAchievable) {
       if (requiredGPA > _gpaScale) {
-        reason = 'Would require GPA of ${requiredGPA.toStringAsFixed(2)}, '
+        reason =
+            'Would require GPA of ${requiredGPA.toStringAsFixed(2)}, '
             'which exceeds maximum of $_gpaScale';
       } else if (requiredGPA < 0) {
         reason = 'Current GPA already exceeds target';
@@ -332,7 +352,9 @@ class GPACalculationEngine {
     final totalQualityPoints = currentQualityPoints + hypotheticalQualityPoints;
     final totalCredits = currentCredits + hypotheticalCredits;
 
-    final newGPA = totalCredits > 0 ? totalQualityPoints / totalCredits : currentGPA;
+    final newGPA = totalCredits > 0
+        ? totalQualityPoints / totalCredits
+        : currentGPA;
     final gpaChange = newGPA - currentGPA;
 
     return WhatIfResult(
@@ -413,10 +435,9 @@ class CumulativeGPAResult {
   double get displayGPA => double.parse(gpa.toStringAsFixed(2));
 
   /// Percentage of attempted credits that were earned
-  double get completionRate =>
-      totalCreditsAttempted > 0
-          ? totalCreditsEarned / totalCreditsAttempted
-          : 0.0;
+  double get completionRate => totalCreditsAttempted > 0
+      ? totalCreditsEarned / totalCreditsAttempted
+      : 0.0;
 }
 
 /// Result of required GPA calculation.
@@ -483,4 +504,3 @@ enum GPAImpact {
   moderateDecrease,
   majorDecrease,
 }
-

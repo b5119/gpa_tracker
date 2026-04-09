@@ -3,6 +3,7 @@ import '../../../domain/repositories/gpa_repository.dart';
 import '../../../domain/models/gpa_record.dart';
 
 import '../datasources/local/database_service.dart';
+
 class SQLiteGPARepository implements GPARepository {
   final DatabaseService _dbService;
 

@@ -71,9 +71,9 @@ class PredictFutureGPA {
 
     // Project trend forward
     final futureIndex = historicalGPAs.length + remainingSemesters - 1;
-    final projectedGPA = (trendAnalysis.trendSlope * futureIndex +
-        trendAnalysis.trendIntercept)
-        .clamp(gradingConfig.minGPA, gradingConfig.maxGPA);
+    final projectedGPA =
+        (trendAnalysis.trendSlope * futureIndex + trendAnalysis.trendIntercept)
+            .clamp(gradingConfig.minGPA, gradingConfig.maxGPA);
 
     // Calculate confidence
     final confidence = _calculateConfidence(
@@ -301,7 +301,7 @@ class PredictionResult {
 }
 
 enum ConfidenceLevel {
-  high,    // 70%+ confidence
-  medium,  // 40-70% confidence
-  low,     // <40% confidence
+  high, // 70%+ confidence
+  medium, // 40-70% confidence
+  low, // <40% confidence
 }

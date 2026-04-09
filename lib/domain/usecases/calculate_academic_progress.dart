@@ -48,10 +48,7 @@ class CalculateAcademicProgress {
       expectedSemesters,
     );
 
-    final creditVelocity = _calculateVelocity(
-      earnedCredits,
-      expectedCredits,
-    );
+    final creditVelocity = _calculateVelocity(earnedCredits, expectedCredits);
 
     // Remaining metrics
     final remainingCredits = student.totalCreditsRequired - earnedCredits;
@@ -102,10 +99,10 @@ class CalculateAcademicProgress {
   }
 
   int _calculateExpectedCredits(
-      int totalRequired,
-      int semestersSinceEnrollment,
-      int expectedSemesters,
-      ) {
+    int totalRequired,
+    int semestersSinceEnrollment,
+    int expectedSemesters,
+  ) {
     if (expectedSemesters == 0) return 0;
 
     // Linear progression assumption
@@ -119,10 +116,10 @@ class CalculateAcademicProgress {
   }
 
   int _calculateRemainingSemesters(
-      int durationYears,
-      DateTime enrollmentDate,
-      int currentYear,
-      ) {
+    int durationYears,
+    DateTime enrollmentDate,
+    int currentYear,
+  ) {
     final totalSemesters = durationYears * 2;
     final elapsedYears = currentYear - 1;
     final elapsedSemesters = elapsedYears * 2;
@@ -131,11 +128,11 @@ class CalculateAcademicProgress {
   }
 
   PaceStatus _analyzePace(
-      int completedSemesters,
-      int expectedSemesters,
-      int earnedCredits,
-      int expectedCredits,
-      ) {
+    int completedSemesters,
+    int expectedSemesters,
+    int earnedCredits,
+    int expectedCredits,
+  ) {
     // Check both semester count and credit accumulation
     final semesterRatio = expectedSemesters > 0
         ? completedSemesters / expectedSemesters
@@ -155,29 +152,29 @@ class CalculateAcademicProgress {
   }
 
   DateTime _projectGraduationDate(
-      DateTime expectedDate,
-      PaceStatus pace,
-      int remainingCredits,
-      int earnedCredits,
-      ) {
+    DateTime expectedDate,
+    PaceStatus pace,
+    int remainingCredits,
+    int earnedCredits,
+  ) {
     switch (pace) {
       case PaceStatus.accelerated:
-      // May graduate early
+        // May graduate early
         return expectedDate.subtract(const Duration(days: 180));
 
       case PaceStatus.onPace:
         return expectedDate;
 
       case PaceStatus.slightlyBehind:
-      // 1 semester delay
+        // 1 semester delay
         return expectedDate.add(const Duration(days: 180));
 
       case PaceStatus.behindPace:
-      // 2 semester delay
+        // 2 semester delay
         return expectedDate.add(const Duration(days: 365));
 
       case PaceStatus.significantlyBehind:
-      // Significant delay - needs intervention
+        // Significant delay - needs intervention
         return expectedDate.add(const Duration(days: 730));
     }
   }
@@ -246,9 +243,9 @@ class AcademicProgress {
 
 /// Academic pace classification
 enum PaceStatus {
-  accelerated,           // >110% of expected progress
-  onPace,               // 90-110% of expected progress
-  slightlyBehind,       // 70-90% of expected progress
-  behindPace,           // 50-70% of expected progress
-  significantlyBehind,  // <50% of expected progress
+  accelerated, // >110% of expected progress
+  onPace, // 90-110% of expected progress
+  slightlyBehind, // 70-90% of expected progress
+  behindPace, // 50-70% of expected progress
+  significantlyBehind, // <50% of expected progress
 }

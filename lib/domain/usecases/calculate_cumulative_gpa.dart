@@ -71,7 +71,9 @@ class CalculateCumulativeGPA {
     }
 
     // Calculate GPA from final courses
-    final gradedCourses = finalCourses.where((c) => c.gradePoint != null).toList();
+    final gradedCourses = finalCourses
+        .where((c) => c.gradePoint != null)
+        .toList();
 
     if (gradedCourses.isEmpty) {
       return CumulativeGPAResult(
@@ -95,8 +97,9 @@ class CalculateCumulativeGPA {
         totalQualityPoints += course.gradePoint! * course.credits;
 
         // Credits earned if passing grade
-        if (course.gradePoint! >= gradingConfig.minGPA +
-            ((gradingConfig.maxGPA - gradingConfig.minGPA) * 0.5)) {
+        if (course.gradePoint! >=
+            gradingConfig.minGPA +
+                ((gradingConfig.maxGPA - gradingConfig.minGPA) * 0.5)) {
           totalCreditsEarned += course.credits;
         }
       }
@@ -118,10 +121,10 @@ class CalculateCumulativeGPA {
 
   /// Apply retake policy to determine final grade
   Course? _applyRetakePolicy(
-      List<Course> attempts,
-      RetakePolicy policy,
-      GradingConfig gradingConfig,
-      ) {
+    List<Course> attempts,
+    RetakePolicy policy,
+    GradingConfig gradingConfig,
+  ) {
     // Filter to graded attempts
     final graded = attempts.where((c) => c.gradePoint != null).toList();
     if (graded.isEmpty) return attempts.last;
@@ -131,24 +134,27 @@ class CalculateCumulativeGPA {
 
     switch (policy) {
       case RetakePolicy.replace:
-      // Most recent graded attempt
+        // Most recent graded attempt
         return graded.last;
 
       case RetakePolicy.average:
-      // Create synthetic course with averaged grade
-        final avgGrade = graded
-            .map((c) => c.gradePoint!)
-            .reduce((a, b) => a + b) / graded.length;
+        // Create synthetic course with averaged grade
+        final avgGrade =
+            graded.map((c) => c.gradePoint!).reduce((a, b) => a + b) /
+            graded.length;
 
         return graded.first.copyWith(
-          gradePoint: avgGrade.clamp(gradingConfig.minGPA, gradingConfig.maxGPA),
+          gradePoint: avgGrade.clamp(
+            gradingConfig.minGPA,
+            gradingConfig.maxGPA,
+          ),
         );
 
       case RetakePolicy.best:
-      // Highest grade
+        // Highest grade
         return graded.reduce(
-              (best, current) =>
-          current.gradePoint! > best.gradePoint! ? current : best,
+          (best, current) =>
+              current.gradePoint! > best.gradePoint! ? current : best,
         );
     }
   }

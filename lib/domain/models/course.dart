@@ -20,7 +20,7 @@ class Course extends Equatable {
     this.letterGrade,
     this.gradePoint,
     this.attemptNumber = 1,
-    this.courseType = CourseType.major,
+    this.courseType = CourseType.core,
   });
 
   bool get isPassing => gradePoint != null && gradePoint! >= 2.0;
@@ -38,7 +38,7 @@ class Course extends Equatable {
       gradePoint: (json['grade_point'] as num?)?.toDouble(),
       attemptNumber: json['attempt_number'] as int? ?? 1,
       courseType: CourseType.values.firstWhere(
-            (e) => e.toString() == 'CourseType.${json['course_type']}',
+        (e) => e.toString() == 'CourseType.${json['course_type']}',
         orElse: () => CourseType.major,
       ),
     );
@@ -94,9 +94,4 @@ class Course extends Equatable {
   ];
 }
 
-enum CourseType {
-  major,
-  minor,
-  elective,
-  general,
-}
+enum CourseType { core, major, minor, elective, general }

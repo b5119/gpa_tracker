@@ -57,15 +57,27 @@ class GradingConfig extends Equatable {
       systemType: GradingSystemType.points4_0,
       maxGPA: 4.0,
       gradeToPointMap: const {
-        'A+': 4.0, 'A': 4.0, 'A-': 3.7,
-        'B+': 3.3, 'B': 3.0, 'B-': 2.7,
-        'C+': 2.3, 'C': 2.0, 'C-': 1.7,
-        'D+': 1.3, 'D': 1.0, 'D-': 0.7,
+        'A+': 4.0,
+        'A': 4.0,
+        'A-': 3.7,
+        'B+': 3.3,
+        'B': 3.0,
+        'B-': 2.7,
+        'C+': 2.3,
+        'C': 2.0,
+        'C-': 1.7,
+        'D+': 1.3,
+        'D': 1.0,
+        'D-': 0.7,
         'F': 0.0,
       },
       classifications: [
         GPAClassification(name: "Dean's List", minGPA: 3.5, color: 0xFF4CAF50),
-        GPAClassification(name: 'Good Standing', minGPA: 3.0, color: 0xFF8BC34A),
+        GPAClassification(
+          name: 'Good Standing',
+          minGPA: 3.0,
+          color: 0xFF8BC34A,
+        ),
         GPAClassification(name: 'Satisfactory', minGPA: 2.0, color: 0xFFFFC107),
         GPAClassification(name: 'Probation', minGPA: 1.0, color: 0xFFFF9800),
         GPAClassification(name: 'At Risk', minGPA: 0.0, color: 0xFFF44336),
@@ -83,17 +95,37 @@ class GradingConfig extends Equatable {
       systemType: GradingSystemType.points5_0,
       maxGPA: 5.0,
       gradeToPointMap: const {
-        'A+': 5.0, 'A': 5.0, 'A-': 4.7,
-        'B+': 4.3, 'B': 4.0, 'B-': 3.7,
-        'C+': 3.3, 'C': 3.0, 'C-': 2.7,
-        'D+': 2.3, 'D': 2.0, 'D-': 1.7,
+        'A+': 5.0,
+        'A': 5.0,
+        'A-': 4.7,
+        'B+': 4.3,
+        'B': 4.0,
+        'B-': 3.7,
+        'C+': 3.3,
+        'C': 3.0,
+        'C-': 2.7,
+        'D+': 2.3,
+        'D': 2.0,
+        'D-': 1.7,
         'F': 0.0,
       },
       classifications: [
-        GPAClassification(name: 'Summa Cum Laude', minGPA: 4.7, color: 0xFF4CAF50),
-        GPAClassification(name: 'Magna Cum Laude', minGPA: 4.3, color: 0xFF66BB6A),
+        GPAClassification(
+          name: 'Summa Cum Laude',
+          minGPA: 4.7,
+          color: 0xFF4CAF50,
+        ),
+        GPAClassification(
+          name: 'Magna Cum Laude',
+          minGPA: 4.3,
+          color: 0xFF66BB6A,
+        ),
         GPAClassification(name: 'Cum Laude', minGPA: 4.0, color: 0xFF8BC34A),
-        GPAClassification(name: 'Good Standing', minGPA: 3.0, color: 0xFFFFC107),
+        GPAClassification(
+          name: 'Good Standing',
+          minGPA: 3.0,
+          color: 0xFFFFC107,
+        ),
         GPAClassification(name: 'At Risk', minGPA: 0.0, color: 0xFFF44336),
       ],
       isDefault: false,
@@ -116,9 +148,21 @@ class GradingConfig extends Equatable {
         'Fail': 0.0,
       },
       classifications: [
-        GPAClassification(name: 'First Class Honours', minGPA: 70.0, color: 0xFF4CAF50),
-        GPAClassification(name: 'Upper Second (2:1)', minGPA: 60.0, color: 0xFF8BC34A),
-        GPAClassification(name: 'Lower Second (2:2)', minGPA: 50.0, color: 0xFFFFC107),
+        GPAClassification(
+          name: 'First Class Honours',
+          minGPA: 70.0,
+          color: 0xFF4CAF50,
+        ),
+        GPAClassification(
+          name: 'Upper Second (2:1)',
+          minGPA: 60.0,
+          color: 0xFF8BC34A,
+        ),
+        GPAClassification(
+          name: 'Lower Second (2:2)',
+          minGPA: 50.0,
+          color: 0xFFFFC107,
+        ),
         GPAClassification(name: 'Third Class', minGPA: 40.0, color: 0xFFFF9800),
         GPAClassification(name: 'Fail', minGPA: 0.0, color: 0xFFF44336),
       ],
@@ -178,13 +222,13 @@ class GradingConfig extends Equatable {
       id: json['id'] as String,
       name: json['name'] as String,
       systemType: GradingSystemType.values.firstWhere(
-            (e) => e.name == json['system_type'],
+        (e) => e.name == json['system_type'],
       ),
       maxGPA: (json['max_gpa'] as num).toDouble(),
       minGPA: (json['min_gpa'] as num?)?.toDouble() ?? 0.0,
       gradeToPointMap: Map<String, double>.from(
         (json['grade_to_point_map'] as Map).map(
-              (key, value) => MapEntry(key as String, (value as num).toDouble()),
+          (key, value) => MapEntry(key as String, (value as num).toDouble()),
         ),
       ),
       classifications: (json['classifications'] as List)
@@ -223,19 +267,26 @@ class GradingConfig extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, name, systemType, maxGPA, minGPA,
-    gradeToPointMap, classifications, isDefault,
-    createdAt, lastModified,
+    id,
+    name,
+    systemType,
+    maxGPA,
+    minGPA,
+    gradeToPointMap,
+    classifications,
+    isDefault,
+    createdAt,
+    lastModified,
   ];
 }
 
 /// Types of grading systems
 enum GradingSystemType {
-  points4_0,    // US 4.0 scale
-  points5_0,    // US 5.0 scale
-  percentage,   // UK 0-100 percentage
-  letterOnly,   // Pure letter grades (no numeric)
-  custom,       // User-defined
+  points4_0, // US 4.0 scale
+  points5_0, // US 5.0 scale
+  percentage, // UK 0-100 percentage
+  letterOnly, // Pure letter grades (no numeric)
+  custom, // User-defined
 }
 
 /// GPA classification/standing definition

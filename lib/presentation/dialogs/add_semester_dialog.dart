@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/semester.dart';
@@ -42,141 +41,165 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Add Semester'),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Semester Details',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 16),
-
-              // Quick semester builder
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _semesterType,
-                      decoration: const InputDecoration(
-                        labelText: 'Type',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: DateTimeConstants.semesterNames.map((name) {
-                        return DropdownMenuItem(value: name, child: Text(name));
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _semesterType = value;
-                            _updateSemesterName();
-                            _updateDatesForSemesterType(value);
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: DropdownButtonFormField<int>(
-                      initialValue: _year,
-                      decoration: const InputDecoration(
-                        labelText: 'Year',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: List.generate(10, (index) {
-                        final year = DateTime.now().year - 2 + index;
-                        return DropdownMenuItem(
-                          value: year,
-                          child: Text('$year'),
-                        );
-                      }),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _year = value;
-                            _updateSemesterName();
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Custom name override
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Semester Name',
-                  prefixIcon: Icon(Icons.label),
-                  border: OutlineInputBorder(),
-                  hintText: 'e.g., Fall 2024',
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Semester Details',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter semester name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Start Date
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today),
-                title: const Text('Start Date'),
-                subtitle: Text(_formatDate(_startDate)),
-                trailing: const Icon(Icons.edit),
-                onTap: () => _selectDate(context, true),
-              ),
-
-              // End Date
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.event),
-                title: const Text('End Date'),
-                subtitle: Text(_formatDate(_endDate)),
-                trailing: const Icon(Icons.edit),
-                onTap: () => _selectDate(context, false),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Status
-              DropdownButtonFormField<SemesterStatus>(
-                initialValue: _status,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  prefixIcon: Icon(Icons.flag),
-                  border: OutlineInputBorder(),
+                // Quick semester builder - FIXED with Flexible
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 3,
+                      child: DropdownButtonFormField<String>(
+                        value: _semesterType,
+                        decoration: const InputDecoration(
+                          labelText: 'Type',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          isDense: true,
+                        ),
+                        isExpanded: true,
+                        items: DateTimeConstants.semesterNames.map((name) {
+                          return DropdownMenuItem(
+                            value: name,
+                            child: Text(name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _semesterType = value;
+                              _updateSemesterName();
+                              _updateDatesForSemesterType(value);
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      flex: 2,
+                      child: DropdownButtonFormField<int>(
+                        value: _year,
+                        decoration: const InputDecoration(
+                          labelText: 'Year',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          isDense: true,
+                        ),
+                        isExpanded: true,
+                        items: List.generate(
+                          DateTime.now().year - 2020 + 6, // 2020 to current + 5
+                          (index) {
+                            final year = 2020 + index;
+                            return DropdownMenuItem(
+                              value: year,
+                              child: Text('$year'),
+                            );
+                          },
+                        ),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _year = value;
+                              _updateSemesterName();
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                items: const [
-                  DropdownMenuItem(
-                    value: SemesterStatus.upcoming,
-                    child: Text('Upcoming'),
+                const SizedBox(height: 16),
+
+                // Custom name override
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Semester Name',
+                    prefixIcon: Icon(Icons.label),
+                    border: OutlineInputBorder(),
+                    hintText: 'e.g., Fall 2024',
                   ),
-                  DropdownMenuItem(
-                    value: SemesterStatus.inProgress,
-                    child: Text('In Progress'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter semester name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Start Date
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.calendar_today),
+                  title: const Text('Start Date'),
+                  subtitle: Text(_formatDate(_startDate)),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () => _selectDate(context, true),
+                ),
+
+                // End Date
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.event),
+                  title: const Text('End Date'),
+                  subtitle: Text(_formatDate(_endDate)),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () => _selectDate(context, false),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Status
+                DropdownButtonFormField<SemesterStatus>(
+                  value: _status,
+                  decoration: const InputDecoration(
+                    labelText: 'Status',
+                    prefixIcon: Icon(Icons.flag),
+                    border: OutlineInputBorder(),
                   ),
-                  DropdownMenuItem(
-                    value: SemesterStatus.completed,
-                    child: Text('Completed'),
-                  ),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _status = value);
-                  }
-                },
-              ),
-            ],
+                  isExpanded: true,
+                  items: const [
+                    DropdownMenuItem(
+                      value: SemesterStatus.upcoming,
+                      child: Text('Upcoming'),
+                    ),
+                    DropdownMenuItem(
+                      value: SemesterStatus.inProgress,
+                      child: Text('In Progress'),
+                    ),
+                    DropdownMenuItem(
+                      value: SemesterStatus.completed,
+                      child: Text('Completed'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _status = value);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -197,7 +220,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
     final picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? _startDate : _endDate,
-      firstDate: DateTime(2000),
+      firstDate: DateTime(2020),
       lastDate: DateTime(2030),
     );
 
@@ -232,7 +255,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
 
       final studentId = ref.read(currentStudentIdProvider);
       final newSemester = Semester(
-        id: 'semester_${DateTime.now().millisecondsSinceEpoch}', // Simple ID generation
+        id: 'semester_${DateTime.now().millisecondsSinceEpoch}',
         studentId: studentId,
         name: _nameController.text.trim(),
         startDate: _startDate,
@@ -252,7 +275,6 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
               action: SnackBarAction(
                 label: 'Add Course',
                 onPressed: () {
-                  // Show add course dialog
                   showDialog(
                     context: context,
                     builder: (ctx) => AddCourseDialog(semester: newSemester),

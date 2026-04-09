@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import '../../../domain/repositories/student_repository.dart';
 import '../../../domain/models/student.dart';
 import '../datasources/local/database_service.dart';
+
 class SQLiteStudentRepository implements StudentRepository {
   final DatabaseService _dbService;
 
@@ -47,10 +48,6 @@ class SQLiteStudentRepository implements StudentRepository {
   @override
   Future<void> deleteStudent(String id) async {
     final db = await _dbService.database;
-    await db.delete(
-      'students',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('students', where: 'id = ?', whereArgs: [id]);
   }
 }

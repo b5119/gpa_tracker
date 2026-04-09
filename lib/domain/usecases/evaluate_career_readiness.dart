@@ -50,17 +50,25 @@ class EvaluateCareerReadiness {
     }
 
     // Sort by readiness score (descending)
-    sectorEvaluations.sort((a, b) => b.readinessScore.compareTo(a.readinessScore));
+    sectorEvaluations.sort(
+      (a, b) => b.readinessScore.compareTo(a.readinessScore),
+    );
 
     // Categorize opportunities
     final ready = sectorEvaluations
-        .where((e) => e.readiness == CareerReadiness.highlyCompetitive ||
-        e.readiness == CareerReadiness.competitive)
+        .where(
+          (e) =>
+              e.readiness == CareerReadiness.highlyCompetitive ||
+              e.readiness == CareerReadiness.competitive,
+        )
         .toList();
 
     final reachable = sectorEvaluations
-        .where((e) => e.readiness == CareerReadiness.eligible &&
-        e.gapToCompetitive <= 0.5)
+        .where(
+          (e) =>
+              e.readiness == CareerReadiness.eligible &&
+              e.gapToCompetitive <= 0.5,
+        )
         .toList();
 
     final aspirational = sectorEvaluations
@@ -103,9 +111,18 @@ class EvaluateCareerReadiness {
     final fitScore = sector.calculateFitScore(normalizedGPA);
 
     // Calculate gaps
-    final gapToMinimum = (sector.minimumGPA - normalizedGPA).clamp(0.0, double.infinity);
-    final gapToCompetitive = (sector.competitiveGPA - normalizedGPA).clamp(0.0, double.infinity);
-    final gapToTarget = (sector.targetGPA - normalizedGPA).clamp(0.0, double.infinity);
+    final gapToMinimum = (sector.minimumGPA - normalizedGPA).clamp(
+      0.0,
+      double.infinity,
+    );
+    final gapToCompetitive = (sector.competitiveGPA - normalizedGPA).clamp(
+      0.0,
+      double.infinity,
+    );
+    final gapToTarget = (sector.targetGPA - normalizedGPA).clamp(
+      0.0,
+      double.infinity,
+    );
 
     // Determine next milestone
     final nextMilestone = _determineNextMilestone(
@@ -151,12 +168,12 @@ class EvaluateCareerReadiness {
   }
 
   MilestoneInfo _determineNextMilestone(
-      double currentGPA,
-      double gapToMin,
-      double gapToCompetitive,
-      double gapToTarget,
-      CareerSector sector,
-      ) {
+    double currentGPA,
+    double gapToMin,
+    double gapToCompetitive,
+    double gapToTarget,
+    CareerSector sector,
+  ) {
     if (gapToMin > 0) {
       return MilestoneInfo(
         name: 'Minimum Eligibility',
@@ -217,28 +234,40 @@ class EvaluateCareerReadiness {
 
     switch (readiness) {
       case CareerReadiness.highlyCompetitive:
-        recommendations.add('🌟 Excellent fit! Focus on building ${_getSectorSkills(sector)}');
+        recommendations.add(
+          '🌟 Excellent fit! Focus on building ${_getSectorSkills(sector)}',
+        );
         recommendations.add('Consider targeting top companies in this sector');
         break;
 
       case CareerReadiness.competitive:
-        recommendations.add('✅ Competitive candidate! Strengthen with relevant experience');
+        recommendations.add(
+          '✅ Competitive candidate! Strengthen with relevant experience',
+        );
         recommendations.add('Build: ${_getSectorSkills(sector)}');
         break;
 
       case CareerReadiness.eligible:
         if (gapToCompetitive <= 0.3) {
-          recommendations.add('📈 Within reach! Aim for ${sector.competitiveGPA.toStringAsFixed(2)} GPA');
+          recommendations.add(
+            '📈 Within reach! Aim for ${sector.competitiveGPA.toStringAsFixed(2)} GPA',
+          );
           recommendations.add('Focus on high-credit courses this semester');
         } else {
           recommendations.add('⚠️ Eligible but not competitive yet');
-          recommendations.add('Need ${gapToCompetitive.toStringAsFixed(2)} GPA improvement');
+          recommendations.add(
+            'Need ${gapToCompetitive.toStringAsFixed(2)} GPA improvement',
+          );
         }
         break;
 
       case CareerReadiness.notReady:
-        recommendations.add('🎯 Currently below minimum (${sector.minimumGPA.toStringAsFixed(2)} required)');
-        recommendations.add('Consider alternative paths or GPA improvement plan');
+        recommendations.add(
+          '🎯 Currently below minimum (${sector.minimumGPA.toStringAsFixed(2)} required)',
+        );
+        recommendations.add(
+          'Consider alternative paths or GPA improvement plan',
+        );
         break;
     }
 
@@ -248,8 +277,10 @@ class EvaluateCareerReadiness {
   String _getSectorSkills(CareerSector sector) {
     final skillMap = {
       'Investment Banking': 'financial modeling, networking, Excel skills',
-      'Management Consulting': 'case interviews, business acumen, presentation skills',
-      'Software Engineering': 'coding projects, system design, GitHub portfolio',
+      'Management Consulting':
+          'case interviews, business acumen, presentation skills',
+      'Software Engineering':
+          'coding projects, system design, GitHub portfolio',
       'Data Science': 'ML projects, statistics, Python/R proficiency',
       'Academia': 'research experience, publications, strong letters',
     };
@@ -266,11 +297,15 @@ class EvaluateCareerReadiness {
     final insights = <String>[];
 
     if (ready.length >= 5) {
-      insights.add('🎯 Strong position! You\'re competitive in ${ready.length} sectors');
+      insights.add(
+        '🎯 Strong position! You\'re competitive in ${ready.length} sectors',
+      );
     } else if (ready.length >= 3) {
       insights.add('✅ Good standing! Competitive in ${ready.length} sectors');
     } else if (reachable.length >= 3) {
-      insights.add('📈 Opportunity exists! ${reachable.length} sectors within reach');
+      insights.add(
+        '📈 Opportunity exists! ${reachable.length} sectors within reach',
+      );
     } else {
       insights.add('💪 Focus on GPA improvement to expand opportunities');
     }

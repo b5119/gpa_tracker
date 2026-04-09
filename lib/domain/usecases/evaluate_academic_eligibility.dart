@@ -78,7 +78,10 @@ class EvaluateAcademicEligibility {
     final isEligible = meetsCredits && meetsGPA;
 
     final creditProgress = earnedCredits / requiredCredits;
-    final remainingCredits = (requiredCredits - earnedCredits).clamp(0, requiredCredits);
+    final remainingCredits = (requiredCredits - earnedCredits).clamp(
+      0,
+      requiredCredits,
+    );
 
     String status;
     if (isEligible) {
@@ -86,7 +89,8 @@ class EvaluateAcademicEligibility {
     } else if (creditProgress >= 0.9) {
       status = '📚 Almost there! $remainingCredits credits remaining';
     } else if (creditProgress >= 0.75) {
-      status = '📈 On track - ${(creditProgress * 100).toStringAsFixed(0)}% complete';
+      status =
+          '📈 On track - ${(creditProgress * 100).toStringAsFixed(0)}% complete';
     } else {
       status = '🎯 ${(creditProgress * 100).toStringAsFixed(0)}% complete';
     }
@@ -97,7 +101,9 @@ class EvaluateAcademicEligibility {
     }
     if (!meetsGPA) {
       final gapToMinimum = minimumGPA - currentGPA;
-      issues.add('GPA below minimum (need ${gapToMinimum.toStringAsFixed(2)} improvement)');
+      issues.add(
+        'GPA below minimum (need ${gapToMinimum.toStringAsFixed(2)} improvement)',
+      );
     }
 
     return GraduationEligibility(
@@ -156,25 +162,13 @@ class EvaluateAcademicEligibility {
     switch (programType) {
       case ProgramType.bachelors:
       case ProgramType.honours:
-        return const _HonorsThresholds(
-          cum: 3.5,
-          magna: 3.7,
-          summa: 3.9,
-        );
+        return const _HonorsThresholds(cum: 3.5, magna: 3.7, summa: 3.9);
 
       case ProgramType.masters:
-        return const _HonorsThresholds(
-          cum: 3.7,
-          magna: 3.85,
-          summa: 3.95,
-        );
+        return const _HonorsThresholds(cum: 3.7, magna: 3.85, summa: 3.95);
 
       default:
-        return const _HonorsThresholds(
-          cum: 3.5,
-          magna: 3.7,
-          summa: 3.9,
-        );
+        return const _HonorsThresholds(cum: 3.5, magna: 3.7, summa: 3.9);
     }
   }
 
@@ -302,11 +296,7 @@ class HonorsEligibility {
   });
 }
 
-enum HonorsLevel {
-  cumLaude,
-  magnaCumLaude,
-  summaCumLaude,
-}
+enum HonorsLevel { cumLaude, magnaCumLaude, summaCumLaude }
 
 extension HonorsLevelExtension on HonorsLevel {
   String get displayName {

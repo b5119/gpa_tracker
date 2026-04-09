@@ -31,7 +31,7 @@ class CareerIntelligenceEngine {
   /// [sectors] should be loaded from JSON configuration to allow
   /// regional customization without code changes.
   CareerIntelligenceEngine({required List<CareerSector> sectors})
-      : _sectors = sectors;
+    : _sectors = sectors;
 
   /// Factory constructor with default US-based sector data.
   ///
@@ -75,19 +75,24 @@ class CareerIntelligenceEngine {
     for (final sector in _sectors) {
       final fitScore = sector.calculateFitScore(currentGPA);
       final readiness = sector.getReadiness(currentGPA);
-      final gapToCompetitive = math.max(0.0, sector.competitiveGPA - currentGPA);
+      final gapToCompetitive = math.max(
+        0.0,
+        sector.competitiveGPA - currentGPA,
+      );
       final gapToTarget = math.max(0.0, sector.targetGPA - currentGPA);
 
       final isInterested = interestedSectors?.contains(sector.id) ?? false;
 
-      sectorAnalyses.add(SectorAnalysis(
-        sector: sector,
-        fitScore: fitScore,
-        readiness: readiness,
-        gapToCompetitive: gapToCompetitive,
-        gapToTarget: gapToTarget,
-        isInterested: isInterested,
-      ));
+      sectorAnalyses.add(
+        SectorAnalysis(
+          sector: sector,
+          fitScore: fitScore,
+          readiness: readiness,
+          gapToCompetitive: gapToCompetitive,
+          gapToTarget: gapToTarget,
+          isInterested: isInterested,
+        ),
+      );
     }
 
     // Sort by fit score (descending)
@@ -95,12 +100,19 @@ class CareerIntelligenceEngine {
 
     // Categorize opportunities
     final readySectors = sectorAnalyses
-        .where((s) => s.readiness == CareerReadiness.competitive ||
-        s.readiness == CareerReadiness.highlyCompetitive)
+        .where(
+          (s) =>
+              s.readiness == CareerReadiness.competitive ||
+              s.readiness == CareerReadiness.highlyCompetitive,
+        )
         .toList();
 
     final reachableSectors = sectorAnalyses
-        .where((s) => s.readiness == CareerReadiness.eligible && s.gapToCompetitive <= 0.5)
+        .where(
+          (s) =>
+              s.readiness == CareerReadiness.eligible &&
+              s.gapToCompetitive <= 0.5,
+        )
         .toList();
 
     final aspirationalSectors = sectorAnalyses
@@ -119,8 +131,8 @@ class CareerIntelligenceEngine {
 
   /// Generates top 5 sector recommendations based on fit and opportunity.
   List<SectorAnalysis> _generateTopRecommendations(
-      List<SectorAnalysis> analyses,
-      ) {
+    List<SectorAnalysis> analyses,
+  ) {
     // Prioritize:
     // 1. Interested sectors where student is competitive
     // 2. High-fit sectors (score > 0.6)
@@ -166,7 +178,7 @@ class CareerIntelligenceEngine {
     required int currentCredits,
   }) {
     final sector = _sectors.firstWhere(
-          (s) => s.id == targetSectorId,
+      (s) => s.id == targetSectorId,
       orElse: () => throw ArgumentError('Sector not found: $targetSectorId'),
     );
 
@@ -192,7 +204,8 @@ class CareerIntelligenceEngine {
 
     // Calculate required semester GPA
     final currentQualityPoints = currentGPA * currentCredits;
-    final targetQualityPoints = targetTier * (currentCredits + remainingCredits);
+    final targetQualityPoints =
+        targetTier * (currentCredits + remainingCredits);
     final requiredQualityPoints = targetQualityPoints - currentQualityPoints;
     final requiredGPA = remainingCredits > 0
         ? requiredQualityPoints / remainingCredits
@@ -238,12 +251,16 @@ class CareerIntelligenceEngine {
       );
       recommendations.add(
         'Consider these alternatives: explore related sectors with lower GPA requirements, '
-            'or pursue additional certifications and skills to compensate',
+        'or pursue additional certifications and skills to compensate',
       );
 
       // Find reachable alternative sectors
       final alternatives = _sectors
-          .where((s) => s.category == sector.category && s.competitiveGPA <= currentGPA + 0.5)
+          .where(
+            (s) =>
+                s.category == sector.category &&
+                s.competitiveGPA <= currentGPA + 0.5,
+          )
           .take(3)
           .map((s) => s.name)
           .toList();
@@ -257,22 +274,22 @@ class CareerIntelligenceEngine {
       if (requiredGPA >= 3.8) {
         recommendations.add(
           'Requires near-perfect performance (${requiredGPA.toStringAsFixed(2)} GPA). '
-              'Focus on: advanced courses, research opportunities, and strong relationships with professors',
+          'Focus on: advanced courses, research opportunities, and strong relationships with professors',
         );
       } else if (requiredGPA >= 3.5) {
         recommendations.add(
           'Challenging but achievable (${requiredGPA.toStringAsFixed(2)} GPA needed). '
-              'Strategies: prioritize high-credit core courses, seek tutoring for difficult subjects',
+          'Strategies: prioritize high-credit core courses, seek tutoring for difficult subjects',
         );
       } else if (requiredGPA >= 3.0) {
         recommendations.add(
           'Realistic goal (${requiredGPA.toStringAsFixed(2)} GPA needed). '
-              'Stay consistent with study habits and seek help early when struggling',
+          'Stay consistent with study habits and seek help early when struggling',
         );
       } else {
         recommendations.add(
           'Highly achievable (${requiredGPA.toStringAsFixed(2)} GPA needed). '
-              'Maintain good habits to secure this career path',
+          'Maintain good habits to secure this career path',
         );
       }
 
@@ -280,7 +297,7 @@ class CareerIntelligenceEngine {
       if (requiredGPA >= 3.5) {
         recommendations.add(
           'Course strategy: Balance challenging courses with areas of strength. '
-              'Consider pass/fail options for exploratory courses',
+          'Consider pass/fail options for exploratory courses',
         );
       }
 
@@ -296,14 +313,20 @@ class CareerIntelligenceEngine {
   String _getSectorSpecificSkills(CareerSector sector) {
     // Sector-specific skill recommendations
     final skillMap = {
-      'Investment Banking': 'financial modeling skills, Excel proficiency, networking',
-      'Consulting': 'case interview preparation, business acumen, communication skills',
-      'Software Engineering': 'coding projects, GitHub portfolio, system design knowledge',
-      'Academia': 'research publications, conference presentations, graduate exam scores',
-      'Government': 'internship experience, security clearance eligibility, public service commitment',
+      'Investment Banking':
+          'financial modeling skills, Excel proficiency, networking',
+      'Consulting':
+          'case interview preparation, business acumen, communication skills',
+      'Software Engineering':
+          'coding projects, GitHub portfolio, system design knowledge',
+      'Academia':
+          'research publications, conference presentations, graduate exam scores',
+      'Government':
+          'internship experience, security clearance eligibility, public service commitment',
     };
 
-    return skillMap[sector.name] ?? 'relevant skills, internships, and professional networking';
+    return skillMap[sector.name] ??
+        'relevant skills, internships, and professional networking';
   }
 
   // ===========================================================================
@@ -404,7 +427,11 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.2,
     targetGPA: 3.7,
     description: 'Tech companies (FAANG and startups) - skills matter most',
-    typicalRoles: const ['Software Engineer', 'Full Stack Developer', 'Backend Engineer'],
+    typicalRoles: const [
+      'Software Engineer',
+      'Full Stack Developer',
+      'Backend Engineer',
+    ],
     region: 'US',
   ),
   CareerSector(
@@ -426,7 +453,11 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.4,
     targetGPA: 3.6,
     description: 'Big 4 and regional accounting firms',
-    typicalRoles: const ['Staff Accountant', 'Audit Associate', 'Tax Consultant'],
+    typicalRoles: const [
+      'Staff Accountant',
+      'Audit Associate',
+      'Tax Consultant',
+    ],
     region: 'US',
   ),
   CareerSector(
@@ -437,7 +468,11 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.0,
     targetGPA: 3.5,
     description: 'Federal agencies and civil service positions',
-    typicalRoles: const ['Policy Analyst', 'Program Manager', 'Research Specialist'],
+    typicalRoles: const [
+      'Policy Analyst',
+      'Program Manager',
+      'Research Specialist',
+    ],
     region: 'US',
   ),
   CareerSector(
@@ -470,7 +505,11 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.2,
     targetGPA: 3.6,
     description: 'Hospital and healthcare system management',
-    typicalRoles: const ['Healthcare Administrator', 'Operations Manager', 'Program Director'],
+    typicalRoles: const [
+      'Healthcare Administrator',
+      'Operations Manager',
+      'Program Director',
+    ],
     region: 'US',
   ),
   CareerSector(
@@ -481,7 +520,11 @@ final _defaultUSCareerSectors = [
     competitiveGPA: 3.0,
     targetGPA: 3.5,
     description: 'Marketing roles in consumer goods and agencies',
-    typicalRoles: const ['Brand Manager', 'Marketing Analyst', 'Digital Marketing Specialist'],
+    typicalRoles: const [
+      'Brand Manager',
+      'Marketing Analyst',
+      'Digital Marketing Specialist',
+    ],
     region: 'US',
   ),
 ];
