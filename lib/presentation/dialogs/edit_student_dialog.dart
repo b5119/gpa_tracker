@@ -358,9 +358,9 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
       );
 
       ref.read(currentStudentProvider.notifier).updateStudent(updatedStudent);
+      final messenger = ScaffoldMessenger.of(context);
       Navigator.pop(context);
-
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
       );
     }
@@ -636,8 +636,9 @@ class _CreateStudentDialogState extends ConsumerState<CreateStudentDialog> {
       ref.invalidate(currentStudentProvider);
 
       if (mounted) {
+        final messenger = ScaffoldMessenger.of(context);
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(content: Text('Profile created successfully!')),
         );
       }

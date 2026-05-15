@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../domain/models/semester.dart';
+import '../../dialogs/add_course_dialog.dart';
 import '../../dialogs/add_semester_dialog.dart';
 import '../../providers/app_providers.dart';
 import '../settings/settings_screen.dart';
@@ -66,7 +70,11 @@ class DashboardScreen extends ConsumerWidget {
               _SectionHeader(
                 title: 'Recent Semesters',
                 action: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    semestersAsync.whenData((semesters) {
+                      _showAllSemestersSheet(context, ref, semesters);
+                    });
+                  },
                   child: const Text('View All'),
                 ),
               ),
@@ -94,7 +102,7 @@ class DashboardScreen extends ConsumerWidget {
                         credits: semester.totalCredits,
                         courseCount: semester.courses.length,
                         onTap: () {
-                          // Navigate to semester detail
+                          _showSemesterDetailsSheet(context, ref, semester);
                         },
                       );
                     }).toList(),
@@ -117,11 +125,268 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddSemesterDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
+  Future<void> _showAddSemesterDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final semester = await showDialog<Semester>(
       context: context,
       builder: (context) => const AddSemesterDialog(),
     );
+
+    if (semester == null || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('${semester.name} added successfully'),
+        action: SnackBarAction(
+          label: 'Add Course',
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (_) => AddCourseDialog(semester: semester),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showAllSemestersSheet(
+    BuildContext context,
+    WidgetRef ref,
+    List<Semester> semesters,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(sheetContext).size.height * 0.8,
+            child: Padding(
+              padding: const EdgeInsets.all(UIConstants.paddingMedium),
+              child: semesters.isEmpty
+                  ? _EmptyState(
+                      icon: Icons.school_outlined,
+                      message: 'No semesters yet',
+                      actionLabel: 'Add First Semester',
+                      onAction: () {
+                        Navigator.pop(sheetContext);
+                        _showAddSemesterDialog(context, ref);
+                      },
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'All Semesters',
+                          style: Theme.of(sheetContext).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: UIConstants.paddingMedium),
+                        Expanded(
+                          child: ListView(
+                            children: semesters.reversed.map((semester) {
+                              return _SemesterCard(
+                                semesterName: semester.name,
+                                gpa: semester.calculateGPA(),
+                                credits: semester.totalCredits,
+                                courseCount: semester.courses.length,
+                                onTap: () {
+                                  Navigator.pop(sheetContext);
+                                  _showSemesterDetailsSheet(
+                                    context,
+                                    ref,
+                                    semester,
+                                  );
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSemesterDetailsSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Semester semester,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final gpa = semester.calculateGPA();
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(UIConstants.paddingMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  semester.name,
+                  style: Theme.of(sheetContext).textTheme.headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: UIConstants.paddingSmall),
+                Wrap(
+                  spacing: UIConstants.paddingSmall,
+                  runSpacing: UIConstants.paddingSmall,
+                  children: [
+                    Chip(
+                      avatar: const Icon(Icons.flag_outlined),
+                      label: Text(_formatSemesterStatus(semester.status)),
+                    ),
+                    Chip(
+                      avatar: const Icon(Icons.school_outlined),
+                      label: Text('${semester.totalCredits} credits'),
+                    ),
+                    Chip(
+                      avatar: const Icon(Icons.book_outlined),
+                      label: Text('${semester.courses.length} courses'),
+                    ),
+                    Chip(
+                      avatar: const Icon(Icons.analytics_outlined),
+                      label: Text(
+                        gpa == null
+                            ? 'GPA pending'
+                            : 'GPA ${gpa.toStringAsFixed(2)}',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: UIConstants.paddingMedium),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.pop(sheetContext);
+                          showDialog(
+                            context: context,
+                            builder: (_) => AddCourseDialog(semester: semester),
+                          );
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Course'),
+                      ),
+                    ),
+                    const SizedBox(width: UIConstants.paddingSmall),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () =>
+                            _confirmDeleteSemester(context, ref, semester),
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text('Delete'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: UIConstants.paddingLarge),
+                Text(
+                  'Courses',
+                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: UIConstants.paddingSmall),
+                if (semester.courses.isEmpty)
+                  const Text('No courses added to this semester yet.')
+                else
+                  ...semester.courses.map((course) {
+                    final gradeLabel = course.letterGrade ?? 'No grade yet';
+                    return Card(
+                      margin: const EdgeInsets.only(
+                        bottom: UIConstants.paddingSmall,
+                      ),
+                      child: ListTile(
+                        title: Text(course.courseCode),
+                        subtitle: Text(
+                          '${course.courseName}\n${course.credits} credits • $gradeLabel',
+                        ),
+                        isThreeLine: true,
+                        trailing: Text(
+                          course.gradePoint?.toStringAsFixed(2) ?? '--',
+                          style: Theme.of(sheetContext).textTheme.titleMedium,
+                        ),
+                      ),
+                    );
+                  }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _confirmDeleteSemester(
+    BuildContext context,
+    WidgetRef ref,
+    Semester semester,
+  ) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Semester?'),
+        content: Text(
+          'Delete ${semester.name} and all of its courses? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+    if (!context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.pop(context);
+    unawaited(
+      ref
+          .read(semestersProvider.notifier)
+          .deleteSemester(semester.id)
+          .then((_) {
+            messenger.showSnackBar(
+              SnackBar(content: Text('${semester.name} deleted')),
+            );
+          })
+          .catchError((error) {
+            messenger.showSnackBar(
+              SnackBar(content: Text('Failed to delete semester: $error')),
+            );
+          }),
+    );
+  }
+
+  String _formatSemesterStatus(SemesterStatus status) {
+    switch (status) {
+      case SemesterStatus.upcoming:
+        return 'Upcoming';
+      case SemesterStatus.inProgress:
+        return 'In Progress';
+      case SemesterStatus.completed:
+        return 'Completed';
+    }
   }
 }
 

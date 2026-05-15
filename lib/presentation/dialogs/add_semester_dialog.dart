@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/semester.dart';
 import '../providers/app_providers.dart';
-import 'add_course_dialog.dart';
 
 class AddSemesterDialog extends ConsumerStatefulWidget {
   const AddSemesterDialog({super.key});
@@ -62,7 +61,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
                     Flexible(
                       flex: 3,
                       child: DropdownButtonFormField<String>(
-                        value: _semesterType,
+                        initialValue: _semesterType,
                         decoration: const InputDecoration(
                           labelText: 'Type',
                           border: OutlineInputBorder(),
@@ -94,7 +93,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
                     Flexible(
                       flex: 2,
                       child: DropdownButtonFormField<int>(
-                        value: _year,
+                        initialValue: _year,
                         decoration: const InputDecoration(
                           labelText: 'Year',
                           border: OutlineInputBorder(),
@@ -171,7 +170,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
 
                 // Status
                 DropdownButtonFormField<SemesterStatus>(
-                  value: _status,
+                  initialValue: _status,
                   decoration: const InputDecoration(
                     labelText: 'Status',
                     prefixIcon: Icon(Icons.flag),
@@ -268,21 +267,7 @@ class _AddSemesterDialogState extends ConsumerState<AddSemesterDialog> {
         await ref.read(semestersProvider.notifier).addSemester(newSemester);
 
         if (mounted) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${newSemester.name} added successfully'),
-              action: SnackBarAction(
-                label: 'Add Course',
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AddCourseDialog(semester: newSemester),
-                  );
-                },
-              ),
-            ),
-          );
+          Navigator.pop(context, newSemester);
         }
       } catch (e) {
         if (mounted) {

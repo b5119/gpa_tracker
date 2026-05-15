@@ -190,77 +190,98 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
             ),
             const SizedBox(height: UIConstants.paddingSmall),
 
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    value: _credits,
-                    decoration: const InputDecoration(
-                      labelText: 'Credits *',
-                      prefixIcon: Icon(Icons.confirmation_num),
-                    ),
-                    items: List.generate(6, (i) => i + 1)
-                        .map(
-                          (c) => DropdownMenuItem(
-                            value: c,
-                            child: Text(c.toString()),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _credits = value);
-                      }
-                    },
-                    validator: (value) {
-                      if (value == null || value < 1 || value > 6) {
-                        return 'Select 1-6 credits';
-                      }
-                      return null;
-                    },
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stackFields = constraints.maxWidth < 420;
+                final creditsField = DropdownButtonFormField<int>(
+                  initialValue: _credits,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Credits *',
+                    prefixIcon: Icon(Icons.confirmation_num),
                   ),
-                ),
-                const SizedBox(width: UIConstants.paddingMedium),
-                Expanded(
-                  child: DropdownButtonFormField<CourseType>(
-                    value: _courseType,
-                    decoration: const InputDecoration(
-                      labelText: 'Course Type',
-                      prefixIcon: Icon(Icons.category),
+                  items: List.generate(6, (i) => i + 1)
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(c.toString()),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _credits = value);
+                    }
+                  },
+                  validator: (value) {
+                    if (value == null || value < 1 || value > 6) {
+                      return 'Select 1-6 credits';
+                    }
+                    return null;
+                  },
+                );
+
+                final courseTypeField = DropdownButtonFormField<CourseType>(
+                  initialValue: _courseType,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Course Type',
+                    prefixIcon: Icon(Icons.category),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: CourseType.core,
+                      child: Text('Core', overflow: TextOverflow.ellipsis),
                     ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: CourseType.core,
-                        child: Text('Core'),
+                    DropdownMenuItem(
+                      value: CourseType.elective,
+                      child: Text('Elective', overflow: TextOverflow.ellipsis),
+                    ),
+                    DropdownMenuItem(
+                      value: CourseType.general,
+                      child: Text(
+                        'General Education',
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      DropdownMenuItem(
-                        value: CourseType.elective,
-                        child: Text('Elective'),
-                      ),
-                      DropdownMenuItem(
-                        value: CourseType.general,
-                        child: Text('General Education'),
-                      ),
-                      DropdownMenuItem(
-                        value: CourseType.major,
-                        child: Text('Major'),
-                      ),
-                      DropdownMenuItem(
-                        value: CourseType.minor,
-                        child: Text('Minor'),
-                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: CourseType.major,
+                      child: Text('Major', overflow: TextOverflow.ellipsis),
+                    ),
+                    DropdownMenuItem(
+                      value: CourseType.minor,
+                      child: Text('Minor', overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setState(() => _courseType = value);
+                  },
+                );
+
+                if (stackFields) {
+                  return Column(
+                    children: [
+                      creditsField,
+                      const SizedBox(height: UIConstants.paddingMedium),
+                      courseTypeField,
                     ],
-                    onChanged: (value) {
-                      if (value != null) setState(() => _courseType = value);
-                    },
-                  ),
-                ),
-              ],
+                  );
+                }
+
+                return Row(
+                  children: [
+                    Expanded(child: creditsField),
+                    const SizedBox(width: UIConstants.paddingMedium),
+                    Expanded(child: courseTypeField),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: UIConstants.paddingMedium),
 
             DropdownButtonFormField<int>(
-              value: _attemptNumber,
+              initialValue: _attemptNumber,
+              isExpanded: true,
               decoration: const InputDecoration(
                 labelText: 'Attempt Number',
                 prefixIcon: Icon(Icons.repeat),
@@ -296,7 +317,8 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
             Text('Grading', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: UIConstants.paddingMedium),
             DropdownButtonFormField<GradingOption>(
-              value: _gradingOption,
+              initialValue: _gradingOption,
+              isExpanded: true,
               decoration: const InputDecoration(
                 labelText: 'Grading Option',
                 prefixIcon: Icon(Icons.grade),
@@ -326,7 +348,8 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
 
             if (_gradingOption == GradingOption.letter)
               DropdownButtonFormField<String>(
-                value: _selectedLetterGrade,
+                initialValue: _selectedLetterGrade,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Letter Grade',
                   prefixIcon: Icon(Icons.emoji_events),
@@ -356,7 +379,8 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
 
             if (_gradingOption == GradingOption.passFail)
               DropdownButtonFormField<String>(
-                value: _passFailSelection,
+                initialValue: _passFailSelection,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Result',
                   prefixIcon: Icon(Icons.check_circle_outline),
@@ -445,8 +469,9 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
         );
 
     if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
     Navigator.pop(context, course);
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(content: Text('Course ${course.courseCode} added')),
     );
   }

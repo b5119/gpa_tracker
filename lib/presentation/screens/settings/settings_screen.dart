@@ -253,24 +253,19 @@ class SettingsScreen extends ConsumerWidget {
   void _showResetDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Reset All Data?'),
         content: const Text(
           'This will permanently delete all your semesters, courses, and academic records. This action cannot be undone.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Reset functionality coming soon'),
-                ),
-              );
+              _resetAppData(context, dialogContext, ref);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Reset'),
@@ -299,6 +294,32 @@ class SettingsScreen extends ConsumerWidget {
         return 'Average of all attempts';
       case RetakePolicy.best:
         return 'Highest grade earned';
+    }
+  }
+
+  Future<void> _resetAppData(
+    BuildContext context,
+    BuildContext dialogContext,
+    WidgetRef ref,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.pop(dialogContext);
+
+    try {
+      await ref.read(databaseServiceProvider).resetDatabase();
+      ref.invalidate(gradingConfigProvider);
+      ref.invalidate(currentStudentProvider);
+      ref.invalidate(semestersProvider);
+
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('All academic data has been reset')),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to reset data: $error')),
+      );
     }
   }
 }

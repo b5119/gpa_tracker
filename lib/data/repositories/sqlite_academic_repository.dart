@@ -81,9 +81,31 @@ class SQLiteAcademicRepository implements AcademicRepository {
       whereArgs: [semester.id],
     );
 
-    // Update courses
+    final existingCourses = await db.query(
+      'courses',
+      columns: ['id'],
+      where: 'semester_id = ?',
+      whereArgs: [semester.id],
+    );
+    final existingCourseIds = existingCourses
+        .map((course) => course['id'] as String)
+        .toSet();
+    final currentCourseIds = semester.courses
+        .map((course) => course.id)
+        .toSet();
+
+    // Sync courses without deleting unchanged rows, which would cascade
+    // and remove related assessments.
     for (final course in semester.courses) {
-      await updateCourse(course);
+      if (existingCourseIds.contains(course.id)) {
+        await updateCourse(course);
+      } else {
+        await saveCourse(course);
+      }
+    }
+
+    for (final courseId in existingCourseIds.difference(currentCourseIds)) {
+      await deleteCourse(courseId);
     }
   }
 

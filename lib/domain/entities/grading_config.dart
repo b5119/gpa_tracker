@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 /// User-defined grading configuration entity
@@ -218,6 +220,16 @@ class GradingConfig extends Equatable {
 
   /// Deserialize from JSON
   factory GradingConfig.fromJson(Map<String, dynamic> json) {
+    final gradeMapRaw = json['grade_to_point_map'];
+    final classificationsRaw = json['classifications'];
+    final decodedGradeMap = gradeMapRaw is String
+        ? jsonDecode(gradeMapRaw) as Map<String, dynamic>
+        : gradeMapRaw as Map;
+    final decodedClassifications = classificationsRaw is String
+        ? jsonDecode(classificationsRaw) as List<dynamic>
+        : classificationsRaw as List;
+    final isDefaultRaw = json['is_default'];
+
     return GradingConfig(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -227,14 +239,16 @@ class GradingConfig extends Equatable {
       maxGPA: (json['max_gpa'] as num).toDouble(),
       minGPA: (json['min_gpa'] as num?)?.toDouble() ?? 0.0,
       gradeToPointMap: Map<String, double>.from(
-        (json['grade_to_point_map'] as Map).map(
+        decodedGradeMap.map(
           (key, value) => MapEntry(key as String, (value as num).toDouble()),
         ),
       ),
-      classifications: (json['classifications'] as List)
+      classifications: decodedClassifications
           .map((c) => GPAClassification.fromJson(c as Map<String, dynamic>))
           .toList(),
-      isDefault: json['is_default'] as bool? ?? false,
+      isDefault: isDefaultRaw is bool
+          ? isDefaultRaw
+          : isDefaultRaw == 1 || isDefaultRaw == '1',
       createdAt: DateTime.parse(json['created_at'] as String),
       lastModified: json['last_modified'] != null
           ? DateTime.parse(json['last_modified'] as String)

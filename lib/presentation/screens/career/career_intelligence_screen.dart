@@ -15,9 +15,9 @@ class CareerIntelligenceScreen extends ConsumerWidget {
         title: const Text('Career Intelligence'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.info_outline),
             onPressed: () {
-              // Show filter options
+              _showScoringInfo(context);
             },
           ),
         ],
@@ -76,6 +76,24 @@ class CareerIntelligenceScreen extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showScoringInfo(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Career Scoring'),
+        content: const Text(
+          'Career recommendations are ranked from your current GPA and the active grading system. Improve your GPA or switch grading scales in Settings to see how the rankings change.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }

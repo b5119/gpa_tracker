@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import '../../core/constants/app_constants.dart';
 import '../../domain/models/student.dart';
 import '../../domain/models/semester.dart';
 import '../../domain/models/course.dart';
@@ -139,7 +140,7 @@ final calculateCourseGPAFromAssessmentsProvider =
 
 /// Current student ID provider
 final currentStudentIdProvider = StateProvider<String>(
-  (ref) => 'default_student',
+  (ref) => DatabaseConstants.defaultStudentId,
 );
 
 // =============================================================================
@@ -204,11 +205,38 @@ class StudentNotifier extends Notifier<AsyncValue<Student?>> {
     state = const AsyncValue.loading();
 
     try {
-      final student = await repository.getStudent(studentId);
+      var student = await repository.getStudent(studentId);
+      if (student == null) {
+        student = _buildDefaultStudent(studentId);
+        await repository.saveStudent(student);
+      }
       state = AsyncValue.data(student);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
+  }
+
+  Student _buildDefaultStudent(String studentId) {
+    final now = DateTime.now();
+    final startTerm = switch (now.month) {
+      >= 8 && <= 12 => AcademicTerm.fall,
+      >= 1 && <= 5 => AcademicTerm.spring,
+      _ => AcademicTerm.summer,
+    };
+
+    return Student(
+      id: studentId,
+      name: 'Student Profile',
+      email: 'student@example.com',
+      program: 'Undeclared Program',
+      programType: ProgramType.bachelors,
+      programDurationYears: 4,
+      enrollmentDate: now,
+      startTerm: startTerm,
+      gpaScale: GPAScales.scale4Point0,
+      totalCreditsRequired: AcademicConstants.typicalBachelorsDegreeCredits,
+      retakePolicy: RetakePolicy.replace,
+    );
   }
 
   Future<void> updateStudent(Student student) async {
