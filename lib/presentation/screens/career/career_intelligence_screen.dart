@@ -49,7 +49,7 @@ class CareerIntelligenceScreen extends ConsumerWidget {
                 const SizedBox(height: UIConstants.paddingSmall),
                 ...report.topRecommendations.map((analysis) {
                   return _SectorCard(analysis: analysis);
-                }).toList(),
+                }),
                 const SizedBox(height: UIConstants.paddingMedium),
                 Text(
                   'All Sectors',
@@ -60,7 +60,7 @@ class CareerIntelligenceScreen extends ConsumerWidget {
                 const SizedBox(height: UIConstants.paddingSmall),
                 ...report.allSectors.map((analysis) {
                   return _SectorCard(analysis: analysis);
-                }).toList(),
+                }),
               ],
             ),
           ),

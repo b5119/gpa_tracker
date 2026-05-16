@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/models/student.dart';
+import '../settings/grading_system_selector_screen.dart';
 import '../../providers/app_providers.dart';
 import '../../dialogs/edit_student_dialog.dart';
 
@@ -76,7 +77,12 @@ class SettingsScreen extends ConsumerWidget {
                     icon: Icons.speed,
                     title: 'GPA Scale',
                     subtitle: config?.name ?? 'Not set',
-                    onTap: () => _showGPAScaleDialog(context, ref, config),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const GradingSystemSelectorScreen(),
+                      ),
+                    ),
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
@@ -150,52 +156,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showGPAScaleDialog(BuildContext context, WidgetRef ref, gradingConfig) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select GPA Scale'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('4.0 Scale'),
-              subtitle: const Text('Standard US system'),
-              leading: Radio<String>(
-                value: 'us_4_0_standard',
-                groupValue: gradingConfig?.id,
-                onChanged: (value) {
-                  if (value != null) {
-                    ref
-                        .read(gradingConfigProvider.notifier)
-                        .setActiveConfig(value);
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-            ),
-            ListTile(
-              title: const Text('5.0 Scale'),
-              subtitle: const Text('Some universities'),
-              leading: Radio<String>(
-                value: 'us_5_0_standard',
-                groupValue: gradingConfig?.id,
-                onChanged: (value) {
-                  if (value != null) {
-                    ref
-                        .read(gradingConfigProvider.notifier)
-                        .setActiveConfig(value);
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showRetakePolicyDialog(
     BuildContext context,
     WidgetRef ref,
@@ -211,23 +171,30 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             const Text('How should retaken courses be calculated?'),
             const SizedBox(height: 16),
-            ...RetakePolicy.values.map((policy) {
-              return RadioListTile<RetakePolicy>(
-                title: Text(_getRetakePolicyLabel(policy)),
-                subtitle: Text(_getRetakePolicyDescription(policy)),
-                value: policy,
-                groupValue: student.retakePolicy,
-                onChanged: (value) {
-                  if (value != null) {
-                    final updated = student.copyWith(retakePolicy: value);
-                    ref
-                        .read(currentStudentProvider.notifier)
-                        .updateStudent(updated);
-                    Navigator.pop(context);
-                  }
-                },
-              );
-            }).toList(),
+            RadioGroup<RetakePolicy>(
+              groupValue: student.retakePolicy,
+              onChanged: (value) {
+                if (value != null) {
+                  final updated = student.copyWith(retakePolicy: value);
+                  ref
+                      .read(currentStudentProvider.notifier)
+                      .updateStudent(updated);
+                  Navigator.pop(context);
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...RetakePolicy.values.map((policy) {
+                    return RadioListTile<RetakePolicy>(
+                      title: Text(_getRetakePolicyLabel(policy)),
+                      subtitle: Text(_getRetakePolicyDescription(policy)),
+                      value: policy,
+                    );
+                  }),
+                ],
+              ),
+            ),
           ],
         ),
       ),

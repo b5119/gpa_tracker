@@ -76,6 +76,7 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
               data: (config) {
                 final letterGrades =
                     config?.availableGrades ?? GPAScales.letterGrades;
+                final activeScale = config?.maxGPA ?? student.gpaScale;
 
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(UIConstants.paddingLarge),
@@ -94,11 +95,7 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
 
                         _buildDetailsCard(),
                         const SizedBox(height: UIConstants.paddingMedium),
-                        _buildGradingCard(
-                          letterGrades,
-                          config,
-                          student.gpaScale,
-                        ),
+                        _buildGradingCard(letterGrades, config, activeScale),
                         const SizedBox(height: UIConstants.paddingLarge),
 
                         Row(
@@ -115,7 +112,7 @@ class _AddCourseDialogState extends ConsumerState<AddCourseDialog> {
                                 icon: const Icon(Icons.save),
                                 label: const Text('Save Course'),
                                 onPressed: () =>
-                                    _saveCourse(config, student.gpaScale),
+                                    _saveCourse(config, activeScale),
                               ),
                             ),
                           ],

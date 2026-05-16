@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/grading_config.dart';
+import '../../dialogs/custom_grading_system_dialog.dart';
 import '../../providers/app_providers.dart';
 
 /// Screen that lets users pick the active grading system (4.0, 5.0, or custom).
@@ -47,12 +48,19 @@ class GradingSystemSelectorScreen extends ConsumerWidget {
                     isActive: config.id == activeId,
                     onPreview: () => _showMapping(context, config),
                     onSetActive: () => _confirmChange(context, ref, config),
+                    onCustomize: () =>
+                        _openCustomDialog(context, ref, template: config),
+                    onDelete:
+                        config.systemType == GradingSystemType.custom &&
+                            config.id != activeId
+                        ? () => _confirmDelete(context, ref, config)
+                        : null,
                   ),
                 ),
                 const SizedBox(height: UIConstants.paddingLarge),
                 FilledButton.icon(
                   icon: const Icon(Icons.add),
-                  onPressed: () => _showCustomComingSoon(context),
+                  onPressed: () => _openCustomDialog(context, ref),
                   label: const Text('Create Custom Grading System'),
                 ),
               ],
@@ -92,7 +100,7 @@ class GradingSystemSelectorScreen extends ConsumerWidget {
 
     try {
       await ref.read(gradingConfigProvider.notifier).setActiveConfig(config.id);
-      ref.invalidate(_gradingConfigsProvider);
+      _refreshConfigs(ref);
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -150,12 +158,79 @@ class GradingSystemSelectorScreen extends ConsumerWidget {
     );
   }
 
-  void _showCustomComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Custom grading system creation coming soon'),
+  Future<void> _openCustomDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    GradingConfig? template,
+  }) async {
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (_) => CustomGradingSystemDialog(templateConfig: template),
+    );
+
+    if (saved != true) return;
+
+    _refreshConfigs(ref);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            template == null
+                ? 'Custom grading system saved'
+                : 'Custom grading system created from ${template.name}',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    GradingConfig config,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete custom system?'),
+        content: Text(
+          '${config.name} will be removed permanently. Existing course grade points will stay as saved values.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
+
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(gradingConfigProvider.notifier).deleteConfig(config.id);
+      _refreshConfigs(ref);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${config.name} deleted')));
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete grading system: $error')),
+        );
+      }
+    }
+  }
+
+  void _refreshConfigs(WidgetRef ref) {
+    ref.invalidate(_gradingConfigsProvider);
+    ref.read(gradingConfigProvider.notifier).refresh();
   }
 }
 
@@ -182,12 +257,16 @@ class _ConfigCard extends StatelessWidget {
   final bool isActive;
   final VoidCallback onPreview;
   final VoidCallback onSetActive;
+  final VoidCallback onCustomize;
+  final VoidCallback? onDelete;
 
   const _ConfigCard({
     required this.config,
     required this.isActive,
     required this.onPreview,
     required this.onSetActive,
+    required this.onCustomize,
+    this.onDelete,
   });
 
   @override
@@ -225,10 +304,11 @@ class _ConfigCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Radio<bool>(
-                    value: true,
-                    groupValue: isActive,
-                    onChanged: (_) => onSetActive(),
+                  Icon(
+                    isActive
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: isActive ? tone.primary : tone.outline,
                   ),
                 ],
               ),
@@ -252,7 +332,17 @@ class _ConfigCard extends StatelessWidget {
                     onPressed: onPreview,
                     child: const Text('Preview full mapping'),
                   ),
+                  TextButton(
+                    onPressed: onCustomize,
+                    child: const Text('Duplicate & adjust'),
+                  ),
                   const Spacer(),
+                  if (onDelete != null)
+                    IconButton(
+                      onPressed: onDelete,
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: 'Delete custom system',
+                    ),
                   FilledButton(
                     onPressed: onSetActive,
                     child: Text(isActive ? 'Active' : 'Set as active'),

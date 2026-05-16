@@ -195,8 +195,9 @@ class GPACalculationEngine {
 
     // Filter to only graded attempts
     final gradedAttempts = attempts.where((a) => a.gradePoint != null).toList();
-    if (gradedAttempts.isEmpty)
+    if (gradedAttempts.isEmpty) {
       return attempts.last; // Return most recent even if ungraded
+    }
 
     switch (policy) {
       case RetakePolicy.replace:

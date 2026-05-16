@@ -97,7 +97,7 @@ class _AddAssessmentDialogState extends ConsumerState<AddAssessmentDialog> {
               const SizedBox(height: UIConstants.paddingMedium),
 
               DropdownButtonFormField<AssessmentType>(
-                value: _type,
+                initialValue: _type,
                 decoration: const InputDecoration(
                   labelText: 'Type',
                   prefixIcon: Icon(Icons.category),

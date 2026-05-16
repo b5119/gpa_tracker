@@ -101,12 +101,12 @@ class SQLiteGradingConfigRepository implements GradingConfigRepository {
   @override
   Future<void> initializeDefaults() async {
     final configs = await getAllConfigs();
+    final existingIds = configs.map((config) => config.id).toSet();
 
-    if (configs.isEmpty) {
-      // Add default US 4.0 system
-      await saveConfig(GradingConfig.standardUS4Point0());
-      await saveConfig(GradingConfig.standardUS5Point0());
-      await saveConfig(GradingConfig.ukPercentage());
+    for (final config in GradingConfig.builtInConfigs()) {
+      if (!existingIds.contains(config.id)) {
+        await saveConfig(config);
+      }
     }
   }
 

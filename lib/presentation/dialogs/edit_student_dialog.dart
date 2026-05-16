@@ -387,9 +387,9 @@ class _CreateStudentDialogState extends ConsumerState<CreateStudentDialog> {
   final _programController = TextEditingController();
   final _creditsController = TextEditingController(text: '120');
   final _durationController = TextEditingController(text: '4');
-  DateTime _enrollmentDate = DateTime.now();
+  final DateTime _enrollmentDate = DateTime.now();
   double _gpaScale = 4.0;
-  RetakePolicy _retakePolicy = RetakePolicy.replace;
+  final RetakePolicy _retakePolicy = RetakePolicy.replace;
   ProgramType _programType = ProgramType.bachelors;
   int _programDurationYears = 4;
   AcademicTerm _startTerm = AcademicTerm.fall;

@@ -162,6 +162,7 @@ class GradingConfigNotifier extends Notifier<AsyncValue<GradingConfig?>> {
     try {
       await repository.initializeDefaults();
       final config = await repository.getActiveConfig();
+      await _syncStudentScale(config);
       state = AsyncValue.data(config);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -176,6 +177,55 @@ class GradingConfigNotifier extends Notifier<AsyncValue<GradingConfig?>> {
       await _loadActiveConfig();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  Future<void> saveConfig(
+    GradingConfig config, {
+    bool setActive = false,
+  }) async {
+    final repository = ref.read(gradingConfigRepositoryProvider);
+
+    try {
+      await repository.saveConfig(config);
+      if (setActive) {
+        await repository.setActiveConfig(config.id);
+      }
+      await _loadActiveConfig();
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteConfig(String configId) async {
+    final repository = ref.read(gradingConfigRepositoryProvider);
+
+    try {
+      await repository.deleteConfig(configId);
+      await _loadActiveConfig();
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> _syncStudentScale(GradingConfig? config) async {
+    final studentState = ref.read(currentStudentProvider);
+    final student = studentState.asData?.value;
+
+    if (config == null ||
+        student == null ||
+        student.gpaScale == config.maxGPA) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(currentStudentProvider.notifier)
+          .updateStudent(student.copyWith(gpaScale: config.maxGPA));
+    } catch (_) {
+      // Leave the active grading config intact even if syncing the legacy scale fails.
     }
   }
 

@@ -24,4 +24,34 @@ void main() {
     expect(config.classifications.first.name, "Dean's List");
     expect(config.isDefault, isTrue);
   });
+
+  test('built-in configs include a simple 4.0 preset', () {
+    final configs = GradingConfig.builtInConfigs();
+
+    expect(configs.any((config) => config.id == 'us_4_0_simple'), isTrue);
+  });
+
+  test(
+    'toCustomCopy creates a custom scale with generated classifications',
+    () {
+      final config = GradingConfig.standardUS4Point0NoModifiers().toCustomCopy(
+        id: 'custom_1',
+        name: 'Campus Custom Scale',
+        maxGPA: 5.0,
+        gradeToPointMap: const {
+          'A': 5.0,
+          'B': 4.0,
+          'C': 3.0,
+          'D': 2.0,
+          'F': 0.0,
+        },
+      );
+
+      expect(config.id, 'custom_1');
+      expect(config.systemType, GradingSystemType.custom);
+      expect(config.maxGPA, 5.0);
+      expect(config.gradeToPointMap['A'], 5.0);
+      expect(config.classifications.first.minGPA, closeTo(4.375, 0.001));
+    },
+  );
 }

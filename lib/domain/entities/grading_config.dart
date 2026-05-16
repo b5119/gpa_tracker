@@ -51,6 +51,41 @@ class GradingConfig extends Equatable {
     this.lastModified,
   });
 
+  static List<GPAClassification> defaultClassificationsForScale(double maxGPA) {
+    return [
+      GPAClassification(
+        name: "Dean's List",
+        minGPA: maxGPA * 0.875,
+        color: 0xFF4CAF50,
+      ),
+      GPAClassification(
+        name: 'Good Standing',
+        minGPA: maxGPA * 0.75,
+        color: 0xFF8BC34A,
+      ),
+      GPAClassification(
+        name: 'Satisfactory',
+        minGPA: maxGPA * 0.5,
+        color: 0xFFFFC107,
+      ),
+      GPAClassification(
+        name: 'Probation',
+        minGPA: maxGPA * 0.25,
+        color: 0xFFFF9800,
+      ),
+      GPAClassification(name: 'At Risk', minGPA: 0.0, color: 0xFFF44336),
+    ];
+  }
+
+  static List<GradingConfig> builtInConfigs() {
+    return [
+      GradingConfig.standardUS4Point0(),
+      GradingConfig.standardUS4Point0NoModifiers(),
+      GradingConfig.standardUS5Point0(),
+      GradingConfig.ukPercentage(),
+    ];
+  }
+
   /// Factory: Standard US 4.0 system
   factory GradingConfig.standardUS4Point0() {
     return GradingConfig(
@@ -135,6 +170,20 @@ class GradingConfig extends Equatable {
     );
   }
 
+  /// Factory: US 4.0 scale without plus/minus grades
+  factory GradingConfig.standardUS4Point0NoModifiers() {
+    return GradingConfig(
+      id: 'us_4_0_simple',
+      name: 'US 4.0 Scale (No +/-)',
+      systemType: GradingSystemType.points4_0,
+      maxGPA: 4.0,
+      gradeToPointMap: const {'A': 4.0, 'B': 3.0, 'C': 2.0, 'D': 1.0, 'F': 0.0},
+      classifications: defaultClassificationsForScale(4.0),
+      isDefault: false,
+      createdAt: DateTime.now(),
+    );
+  }
+
   /// Factory: UK Percentage System
   factory GradingConfig.ukPercentage() {
     return GradingConfig(
@@ -173,6 +222,31 @@ class GradingConfig extends Equatable {
     );
   }
 
+  factory GradingConfig.custom({
+    required String id,
+    required String name,
+    required double maxGPA,
+    required Map<String, double> gradeToPointMap,
+    double minGPA = 0.0,
+    List<GPAClassification>? classifications,
+    DateTime? createdAt,
+    DateTime? lastModified,
+  }) {
+    return GradingConfig(
+      id: id,
+      name: name,
+      systemType: GradingSystemType.custom,
+      maxGPA: maxGPA,
+      minGPA: minGPA,
+      gradeToPointMap: gradeToPointMap,
+      classifications:
+          classifications ?? defaultClassificationsForScale(maxGPA),
+      isDefault: false,
+      createdAt: createdAt ?? DateTime.now(),
+      lastModified: lastModified,
+    );
+  }
+
   /// Get classification for a given GPA
   GPAClassification getClassification(double gpa) {
     // Find the highest classification the GPA qualifies for
@@ -201,6 +275,24 @@ class GradingConfig extends Equatable {
 
   /// Get all available letter grades
   List<String> get availableGrades => gradeToPointMap.keys.toList();
+
+  GradingConfig toCustomCopy({
+    required String id,
+    String? name,
+    double? maxGPA,
+    Map<String, double>? gradeToPointMap,
+  }) {
+    final nextMaxGPA = maxGPA ?? this.maxGPA;
+    return GradingConfig.custom(
+      id: id,
+      name: name ?? '${this.name} Copy',
+      maxGPA: nextMaxGPA,
+      minGPA: minGPA,
+      gradeToPointMap: gradeToPointMap ?? this.gradeToPointMap,
+      classifications: defaultClassificationsForScale(nextMaxGPA),
+      createdAt: DateTime.now(),
+    );
+  }
 
   /// Serialize to JSON
   Map<String, dynamic> toJson() {
