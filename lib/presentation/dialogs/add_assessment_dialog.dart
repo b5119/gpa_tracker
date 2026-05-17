@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../domain/entities/assessment.dart';
-import '../screens/course_detail/course_detail_screen.dart';
+import '../providers/app_providers.dart';
 
 class AddAssessmentDialog extends ConsumerStatefulWidget {
   final String courseId;

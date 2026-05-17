@@ -9,6 +9,8 @@ class CareerIntelligenceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final careerFitAsync = ref.watch(careerFitProvider);
+    final gradingConfigAsync = ref.watch(gradingConfigProvider);
+    final maxScale = gradingConfigAsync.asData?.value?.maxGPA ?? 4.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -35,6 +37,7 @@ class CareerIntelligenceScreen extends ConsumerWidget {
               children: [
                 _OverallAssessmentCard(
                   currentGPA: report.currentGPA,
+                  maxScale: maxScale,
                   assessment: report.overallAssessment,
                   competitiveSectors: report.totalCompetitiveSectors,
                   reachableSectors: report.totalReachableSectors,
@@ -101,12 +104,14 @@ class CareerIntelligenceScreen extends ConsumerWidget {
 
 class _OverallAssessmentCard extends StatelessWidget {
   final double currentGPA;
+  final double maxScale;
   final String assessment;
   final int competitiveSectors;
   final int reachableSectors;
 
   const _OverallAssessmentCard({
     required this.currentGPA,
+    required this.maxScale,
     required this.assessment,
     required this.competitiveSectors,
     required this.reachableSectors,
@@ -136,11 +141,14 @@ class _OverallAssessmentCard extends StatelessWidget {
                     vertical: UIConstants.paddingSmall,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.getGPAColor(currentGPA),
+                    color: AppColors.getGPAColor(
+                      currentGPA,
+                      maxScale: maxScale,
+                    ),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    _getGPATier(currentGPA),
+                    _getGPATier(currentGPA, maxScale),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -177,11 +185,12 @@ class _OverallAssessmentCard extends StatelessWidget {
     );
   }
 
-  String _getGPATier(double gpa) {
-    if (gpa >= 3.7) return 'Excellent';
-    if (gpa >= 3.3) return 'Very Good';
-    if (gpa >= 3.0) return 'Good';
-    if (gpa >= 2.5) return 'Fair';
+  String _getGPATier(double gpa, double maxScale) {
+    final ratio = maxScale == 0 ? 0 : gpa / maxScale;
+    if (ratio >= 0.9) return 'Excellent';
+    if (ratio >= 0.8) return 'Very Good';
+    if (ratio >= 0.7) return 'Good';
+    if (ratio >= 0.55) return 'Fair';
     return 'Below Average';
   }
 }

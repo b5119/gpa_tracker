@@ -7,6 +7,7 @@ import '../../../domain/models/semester.dart';
 import '../../dialogs/add_course_dialog.dart';
 import '../../dialogs/add_semester_dialog.dart';
 import '../../providers/app_providers.dart';
+import '../course_detail/course_assessments_screen.dart';
 import '../settings/settings_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -16,6 +17,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentGPAAsync = ref.watch(currentGPAProvider);
     final semestersAsync = ref.watch(semestersProvider);
+    final gradingConfigAsync = ref.watch(gradingConfigProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +52,15 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               // GPA Hero Card
               currentGPAAsync.when(
-                data: (gpa) => _GPAHeroCard(gpa: gpa ?? 0.0),
+                data: (gpa) => _GPAHeroCard(
+                  gpa: gpa ?? 0.0,
+                  maxScale: gradingConfigAsync.asData?.value?.maxGPA ?? 4.0,
+                  standingLabel:
+                      gradingConfigAsync.asData?.value
+                          ?.getClassification(gpa ?? 0.0)
+                          .name ??
+                      'No classification',
+                ),
                 loading: () => const _LoadingCard(),
                 error: (error, _) => _ErrorCard(message: error.toString()),
               ),
@@ -310,14 +320,44 @@ class DashboardScreen extends ConsumerWidget {
                         bottom: UIConstants.paddingSmall,
                       ),
                       child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) => CourseAssessmentsScreen(
+                                course: course,
+                                semesterName: semester.name,
+                              ),
+                            ),
+                          );
+                        },
                         title: Text(course.courseCode),
                         subtitle: Text(
                           '${course.courseName}\n${course.credits} credits • $gradeLabel',
                         ),
                         isThreeLine: true,
-                        trailing: Text(
-                          course.gradePoint?.toStringAsFixed(2) ?? '--',
-                          style: Theme.of(sheetContext).textTheme.titleMedium,
+                        trailing: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: UIConstants.paddingSmall,
+                          children: [
+                            Text(
+                              course.gradePoint?.toStringAsFixed(2) ?? '--',
+                              style: Theme.of(
+                                sheetContext,
+                              ).textTheme.titleMedium,
+                            ),
+                            IconButton(
+                              onPressed: () => _confirmDeleteCourse(
+                                context,
+                                ref,
+                                semester,
+                                course.id,
+                                course.courseCode,
+                              ),
+                              icon: const Icon(Icons.delete_outline),
+                              tooltip: 'Delete course',
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -378,6 +418,68 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _confirmDeleteCourse(
+    BuildContext context,
+    WidgetRef ref,
+    Semester semester,
+    String courseId,
+    String courseCode,
+  ) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Course?'),
+        content: Text(
+          'Delete $courseCode from ${semester.name}? Any saved assessments for this course will also be removed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final assessmentRepository = ref.read(assessmentRepositoryProvider);
+      final assessments = await assessmentRepository.getAssessmentsByCourse(
+        courseId,
+      );
+
+      for (final assessment in assessments) {
+        await assessmentRepository.deleteAssessment(assessment.id);
+      }
+
+      final updatedSemester = semester.copyWith(
+        courses: semester.courses
+            .where((course) => course.id != courseId)
+            .toList(),
+      );
+      await ref
+          .read(semestersProvider.notifier)
+          .updateSemester(updatedSemester);
+
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('$courseCode deleted from ${semester.name}')),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to delete course: $error')),
+      );
+    }
+  }
+
   String _formatSemesterStatus(SemesterStatus status) {
     switch (status) {
       case SemesterStatus.upcoming:
@@ -396,8 +498,14 @@ class DashboardScreen extends ConsumerWidget {
 
 class _GPAHeroCard extends StatelessWidget {
   final double gpa;
+  final double maxScale;
+  final String standingLabel;
 
-  const _GPAHeroCard({required this.gpa});
+  const _GPAHeroCard({
+    required this.gpa,
+    required this.maxScale,
+    required this.standingLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -452,7 +560,7 @@ class _GPAHeroCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      _getGPALabel(gpa),
+                      standingLabel,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -465,24 +573,23 @@ class _GPAHeroCard extends StatelessWidget {
             ),
             const SizedBox(height: UIConstants.paddingSmall),
             LinearProgressIndicator(
-              value: gpa / GPAScales.scale4Point0,
+              value: maxScale == 0 ? 0 : (gpa / maxScale).clamp(0.0, 1.0),
               backgroundColor: Colors.white.withValues(alpha: 0.3),
               valueColor: AlwaysStoppedAnimation<Color>(gpaColor),
               minHeight: 8,
               borderRadius: BorderRadius.circular(4),
             ),
+            const SizedBox(height: UIConstants.paddingSmall),
+            Text(
+              'Scale: ${maxScale.toStringAsFixed(1)}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
           ],
         ),
       ),
     );
-  }
-
-  String _getGPALabel(double gpa) {
-    if (gpa >= GPAScales.deansListMinimum) return "Dean's List";
-    if (gpa >= GPAScales.goodStandingMinimum) return 'Good Standing';
-    if (gpa >= GPAScales.satisfactoryMinimum) return 'Satisfactory';
-    if (gpa >= GPAScales.probationMinimum) return 'Probation';
-    return 'At Risk';
   }
 }
 

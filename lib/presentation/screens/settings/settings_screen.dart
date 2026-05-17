@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/models/student.dart';
 import '../settings/grading_system_selector_screen.dart';
@@ -109,7 +112,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.download,
                 title: 'Export Data',
                 subtitle: 'Download your academic records',
-                onTap: () => _showExportDialog(context),
+                onTap: () => _showExportDialog(context, ref),
               ),
               _SettingsTile(
                 icon: Icons.refresh,
@@ -201,20 +204,108 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showExportDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Export Data'),
-        content: const Text('Export feature coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+  Future<void> _showExportDialog(BuildContext context, WidgetRef ref) async {
+    try {
+      final studentId = ref.read(currentStudentIdProvider);
+      final studentRepository = ref.read(studentRepositoryProvider);
+      final academicRepository = ref.read(academicRepositoryProvider);
+      final gradingRepository = ref.read(gradingConfigRepositoryProvider);
+      final assessmentRepository = ref.read(assessmentRepositoryProvider);
+
+      final student = await studentRepository.getStudent(studentId);
+      final semesters = await academicRepository.getSemestersByStudent(
+        studentId,
+      );
+      final gradingConfigs = await gradingRepository.getAllConfigs();
+      final activeConfig = await gradingRepository.getActiveConfig();
+
+      final assessmentsByCourse = <String, List<Map<String, dynamic>>>{};
+      for (final semester in semesters) {
+        for (final course in semester.courses) {
+          final assessments = await assessmentRepository.getAssessmentsByCourse(
+            course.id,
+          );
+          assessmentsByCourse[course.id] = assessments
+              .map((assessment) => assessment.toJson())
+              .toList();
+        }
+      }
+
+      final exportPayload = <String, dynamic>{
+        'exported_at': DateTime.now().toIso8601String(),
+        'app_version': AppInfo.appVersion,
+        'student': student?.toJson(),
+        'active_grading_config_id': activeConfig?.id,
+        'grading_configs': gradingConfigs
+            .map((config) => config.toJson())
+            .toList(),
+        'semesters': semesters.map((semester) => semester.toJson()).toList(),
+        'assessments_by_course': assessmentsByCourse,
+      };
+
+      final exportJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(exportPayload);
+
+      if (!context.mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Export Data'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Your data is exported as JSON. You can copy it and store it anywhere you like.',
+                ),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: Container(
+                    width: double.maxFinite,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        dialogContext,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: SingleChildScrollView(
+                      child: SelectableText(exportJson),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: exportJson));
+                if (!dialogContext.mounted) return;
+                Navigator.pop(dialogContext);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Export copied to clipboard')),
+                );
+              },
+              child: const Text('Copy JSON'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to export data: $error')));
+    }
   }
 
   void _showResetDialog(BuildContext context, WidgetRef ref) {
