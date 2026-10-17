@@ -18,7 +18,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 4, // Incremented version for assessments
+      version: 5, // Incremented version for dropped-assessment support
       onCreate: _createDatabase,
       onUpgrade: _onUpgrade,
       onConfigure: (db) async {
@@ -121,6 +121,7 @@ class DatabaseService {
         earned_points REAL,
         due_date TEXT,
         submitted_date TEXT,
+        is_dropped INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
       )
     ''');
@@ -243,6 +244,14 @@ class DatabaseService {
         'submitted_date': DateTime.now().toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
+
+    // Migration to version 5: dropped-assessment flag
+    if (oldVersion < 5) {
+      await db.execute('''
+        ALTER TABLE assessments
+        ADD COLUMN is_dropped INTEGER NOT NULL DEFAULT 0
+      ''');
+    }
   }
 
   /// Close database connection
@@ -266,13 +275,14 @@ class DatabaseService {
 
     // Drop all tables in correct order (respecting foreign keys)
     await db.execute('DROP TABLE IF EXISTS gpa_records');
+    await db.execute('DROP TABLE IF EXISTS assessments');
     await db.execute('DROP TABLE IF EXISTS courses');
     await db.execute('DROP TABLE IF EXISTS semesters');
     await db.execute('DROP TABLE IF EXISTS students');
     await db.execute('DROP TABLE IF EXISTS grading_configs');
 
     // Recreate database
-    await _createDatabase(db, 3);
+    await _createDatabase(db, 5);
   }
 
   /// Get all grading configurations

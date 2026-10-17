@@ -27,7 +27,9 @@ class CalculateCourseGPAFromAssessments {
     }
 
     final active = assessments
-        .where((a) => a.pointsEarned != null && a.totalPoints > 0)
+        .where(
+          (a) => !a.isDropped && a.pointsEarned != null && a.totalPoints > 0,
+        )
         .toList();
     if (active.isEmpty) {
       return const CourseGPAResult(

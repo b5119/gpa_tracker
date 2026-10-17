@@ -16,7 +16,7 @@ class SQLiteAssessmentRepository implements AssessmentRepository {
       'assessments',
       where: 'course_id = ?',
       whereArgs: [courseId],
-      orderBy: 'due_date ASC NULLS LAST',
+      orderBy: 'CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC',
     );
     return results.map((r) => Assessment.fromJson(r)).toList();
   }
@@ -26,7 +26,7 @@ class SQLiteAssessmentRepository implements AssessmentRepository {
     final db = await _dbService.database;
     await db.insert(
       'assessments',
-      assessment.toJson(),
+      _toDatabaseRow(assessment),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -36,7 +36,7 @@ class SQLiteAssessmentRepository implements AssessmentRepository {
     final db = await _dbService.database;
     await db.update(
       'assessments',
-      assessment.toJson(),
+      _toDatabaseRow(assessment),
       where: 'id = ?',
       whereArgs: [assessment.id],
     );
@@ -56,10 +56,25 @@ class SQLiteAssessmentRepository implements AssessmentRepository {
       for (final a in assessments) {
         await txn.insert(
           'assessments',
-          a.toJson(),
+          _toDatabaseRow(a),
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
     });
+  }
+
+  Map<String, dynamic> _toDatabaseRow(Assessment assessment) {
+    return {
+      'id': assessment.id,
+      'course_id': assessment.courseId,
+      'name': assessment.name,
+      'type': assessment.type.name,
+      'weight': assessment.weightPercent,
+      'total_points': assessment.totalPoints,
+      'earned_points': assessment.pointsEarned,
+      'due_date': assessment.dueDate?.toIso8601String(),
+      'submitted_date': assessment.submittedDate?.toIso8601String(),
+      'is_dropped': assessment.isDropped ? 1 : 0,
+    };
   }
 }
